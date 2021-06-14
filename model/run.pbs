@@ -1,0 +1,36 @@
+#!/bin/bash
+#SBATCH -J sys1
+#SBATCH --qos=high
+#SBATCH -N 1
+#SBATCH --ntasks-per-node=1
+#SBATCH -t 4:00:00
+#SBATCH -A hpc4eidow
+#echo commands to stdout
+
+SCRIPT_LOCATION="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+
+cd $SCRIPT_LOCATION/../codes
+echo "Navigated to "$SCRIPT_LOCATION'/../codes'
+module load gcc
+make clean
+make all
+echo "Finished building PolyMix"
+
+cd $SCRIPT_LOCATION'/../model'
+echo "Navigated to " $SCRIPT_LOCATION'/../model'
+polymix=$SCRIPT_LOCATION'/../codes/PolyMix'
+
+echo "Unzipping the model.out file"
+unzip -o model.out.zip
+
+echo "Running PolyMix " $polymix
+time srun $polymix > sys1.out
+
+echo "removing model.out"
+rm model.out
+
+
+mkdir temp_runs
+mv *dat temp_runs
+mv *tmp temp_runs
+python golden_test.py

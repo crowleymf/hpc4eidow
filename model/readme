@@ -1,0 +1,54 @@
+!!!this is the data.in file
+model.out
+mc.out                                                                         500 100 100
+500 100 100
+0.000000000000000000
+50000 1000
+0.000000000000000000
+!!! end of data.in file
+
+!The Polymix.f90 reads the data.in file
+OPEN (unit=14,file='data.in',status='old')
+ READ (14,*) infile
+ READ (14,*) outfile
+ READ (14,*) maxloops,maxsta,maxdyn
+ READ (14,*) pmax
+ READ (14,*) Nequil,Nauto
+ READ (14,*) pnew
+CLOSE (unit=14)
+
+!meaning of maxloops,maxsta,maxdyn
+500000 50000 5000
+500,000 total steps with a maxsta of 50,000, meaning it would write the averages in the boxcalcs subroutine every 50,000 completed loops. 
+5000 is the maxdyn variable or the number of completed loops that we average the dynamic calculations within the chaincalcs subroutine.
+
+!to submit the jobs
+sbatch srun.pbs
+
+!this is the srun.pbs file
+#!/bin/bash
+#SBATCH --time 240:00:00
+#SBATCH -A polymix
+#SBATCH -n 5
+#SBATCH --job-name sys1
+#SBATCH --qos=high
+
+JOBNAME=$SLURM_JOB_NAME          
+
+cd /scratch/lbu/lattice_modeling/codes/PolyMix/NREL
+polymix=/scratch/lbu/lattice_modeling/codes/PolyMix/PolyMix
+
+N_JOB=$SLURM_NTASKS              
+ 
+for((i=1;i<=$N_JOB;i++))
+do
+                  
+cd $JOBNAME.run$i
+  time $polymix > sys.log &
+  cd ..
+done
+ 
+wait
+! end of srun.pbs file
+
+
