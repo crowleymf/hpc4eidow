@@ -1,10 +1,10 @@
 !This subroutine is used to make the random direction moves in this Monte Carlo Scheme.
-SUBROUTINE biasd(x,d)
+SUBROUTINE biasd(x,d,dir_name)
 
 USE param
 
 IMPLICIT NONE
-
+character(len=*) :: dir_name
 INTEGER :: x,d
 REAL :: ran2
 DOUBLE PRECISION :: dtest

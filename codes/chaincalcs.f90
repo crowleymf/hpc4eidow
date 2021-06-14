@@ -1,11 +1,12 @@
 !This subroutine is used to calculate the end-to-end vector, radius of gyration, 
 !order parameters and center of mass density
-SUBROUTINE chaincalcs
-
+SUBROUTINE chaincalcs(dir_name)
 USE param
 
 IMPLICIT NONE
 
+
+character(len=*) :: dir_name
 INTEGER x, y, z
 INTEGER bincheck
 INTEGER point, loop
@@ -78,49 +79,48 @@ DOUBLE PRECISION, ALLOCATABLE:: chainsum(:)
 DOUBLE PRECISION, ALLOCATABLE:: chainsumdev(:)  
 DOUBLE PRECISION chainfinal 
 DOUBLE PRECISION chaindev
-                  
+dir_name = TRIM(ADJUSTL(dir_name))
 !Initialization
 IF (t == 0) THEN
  ALLOCATE (ete(nkt))
 
- OPEN(unit = 40, file = 'etedynamicbox.dat', form = 'formatted')
+ OPEN(unit = 40, file=dir_name//'etedynamicbox.dat', form = 'formatted')
  WRITE(40,302) 'l', 'ete', 'etedev', 'rog', 'rogdev', 'maxete', 't'
  CLOSE(unit = 40)
-      
- OPEN(unit = 41, file = 'chainproperties.dat', form = 'formatted')        
+ OPEN(unit = 41, file=dir_name//'chainproperties.dat', form = 'formatted')        
  WRITE(41,303) 'l', 'ete', 'etedev', 'etepara', 'eteparadev', 'eteperp', 'eteperpdev', 'rog', 'rogdev'        
  CLOSE(unit = 41) 
         
- OPEN(unit = 42, file = 'etedynamicbin.dat', form = 'formatted')
+ OPEN(unit = 42, file=dir_name//'etedynamicbin.dat', form = 'formatted')
  WRITE(42,301) 'x', 'etebin', 'etedev', 'rogbin', 'rogdev'
  CLOSE(unit = 42)
          
- OPEN(unit = 43, file = 'boxorder.dat', form = 'formatted')        
+ OPEN(unit = 43, file=dir_name//'boxorder.dat', form = 'formatted')        
  WRITE(43,302) 'l', 'thetax', 'thetaxdev', 'thetay', 'thetaydev', 'thetaz', 'thetazdev'        
  CLOSE(unit = 43)
          
- OPEN(unit = 44, file = 'chainends.dat', form = 'formatted')
+ OPEN(unit = 44, file=dir_name//'chainends.dat', form = 'formatted')
  WRITE(44,300) 'x', 'chainend', 'chainenddev'
  CLOSE(unit = 44) 
         
- OPEN(unit = 45, file = 'binchainproperties.dat', form = 'formatted')
+ OPEN(unit = 45, file=dir_name//'binchainproperties.dat', form = 'formatted')
  WRITE(45,303) 'x', 'etebin', 'etedbinev', 'eteparabin', 'eteparabindev', 'eteperpbin', 'eteperpbindev', 'rogbin', 'rogbindev'
  CLOSE(unit = 45)
         
- OPEN(unit = 46, file = 'nkcom.dat', form = 'formatted')
+ OPEN(unit = 46, file=dir_name//'nkcom.dat', form = 'formatted')
  WRITE(46,308) 'x', 'nk1', 'nk2', 'nk3', 'nk4', 'nk5', 'nk6', 'nk7', 'nk8'
  CLOSE(unit = 46)
         
- OPEN(unit = 47, file = 'binorder.dat', form = 'formatted')
+ OPEN(unit = 47, file=dir_name//'binorder.dat', form = 'formatted')
  WRITE(47,302) 'l', 'thetaxbin', 'thetaxbindev', 'thetaybin', 'thetaybindev', 'thetazbin', 'thetazdevbin'
  CLOSE(unit = 47)
         
- OPEN(unit = 30, file = 'tmpetedynamicbox.tmp', form = 'unformatted')
- OPEN(unit = 31, file = 'tmpchainproperties.tmp', form = 'unformatted') 
- OPEN(unit = 32, file = 'tmpetedynamicbin.tmp', form = 'unformatted')
- OPEN(unit = 33, file = 'tmpetestaticbox.tmp', form = 'unformatted')   
- OPEN(unit = 34, file = 'tmpnkcombin.tmp', form = 'unformatted')
- OPEN(unit = 35, file = 'tmporderbin.tmp', form = 'unformatted')
+ OPEN(unit = 30, file=dir_name//'tmpetedynamicbox.tmp', form = 'unformatted')
+ OPEN(unit = 31, file=dir_name//'tmpchainproperties.tmp', form = 'unformatted') 
+ OPEN(unit = 32, file=dir_name//'tmpetedynamicbin.tmp', form = 'unformatted')
+ OPEN(unit = 33, file=dir_name//'tmpetestaticbox.tmp', form = 'unformatted')   
+ OPEN(unit = 34, file=dir_name//'tmpnkcombin.tmp', form = 'unformatted')
+ OPEN(unit = 35, file=dir_name//'tmporderbin.tmp', form = 'unformatted')
         
 ENDIF
 !Array allocation
@@ -447,13 +447,13 @@ IF (mod(l,maxdyn)==0 .AND. l /= 0) THEN
  rogfinal = rogboxsum/denom
  rogdev = sqrt(rogboxsumdev/(denom-1.D0))
         
- OPEN(unit = 40, file = 'etedynamicbox.dat', position = 'append')
+ OPEN(unit = 40, file=dir_name//'etedynamicbox.dat', position = 'append')
  WRITE(40,306) l, etefinal, etedev, rogfinal, rogdev, maxete, t
  CLOSE(unit = 40)
        
         
  REWIND(32)
- OPEN(unit = 42, file = 'etedynamicbin.dat', position = 'append')
+ OPEN(unit = 42, file=dir_name//'etedynamicbin.dat', position = 'append')
  WRITE(42,*) 'l=', l
    
  DO loop=1,maxdyn
@@ -617,27 +617,27 @@ IF (mod(l, maxsta) == 0 .AND. l /= 0) THEN
  thetaydev = sqrt(thetaysumdev/(denom-1.D0))
  thetazdev = sqrt(thetazsumdev/(denom-1.D0))
                 
- OPEN(unit = 41, file = 'chainproperties.dat', position = 'append')        
+ OPEN(unit = 41, file=dir_name//'chainproperties.dat', position = 'append')        
  WRITE(41,307) l, etefinal, etedev, eteparafinal, eteparadev, eteperpfinal, eteperpdev, rogfinal, rogdev
  CLOSE (unit = 41) 
          
- OPEN(unit = 43, file = 'boxorder.dat', position = 'append')        
+ OPEN(unit = 43, file=dir_name//'boxorder.dat', position = 'append')        
  WRITE(43,306) l, thetaxfinal, thetaxdev, thetayfinal, thetaydev, thetazfinal, thetazdev
  CLOSE(unit = 43)
         
  REWIND(33)              
  REWIND(35)
         
- OPEN(unit = 44, file = 'chainends.dat', position = 'append')
+ OPEN(unit = 44, file=dir_name//'chainends.dat', position = 'append')
  WRITE(44,*) 'l=', l
         
- OPEN(unit = 45, file = 'binchainproperties.dat', position = 'append')
+ OPEN(unit = 45, file=dir_name//'binchainproperties.dat', position = 'append')
  WRITE(45,*) 'l=', l
         
- OPEN(unit = 46, file = 'nkcom.dat', position = 'append')
+ OPEN(unit = 46, file=dir_name//'nkcom.dat', position = 'append')
  WRITE(46,*) 'l=', l
         
- OPEN(unit = 47, file = 'binorder.dat', position = 'append')
+ OPEN(unit = 47, file=dir_name//'binorder.dat', position = 'append')
  WRITE(47,*) 'l=', l
         
  DO loop=1,maxsta

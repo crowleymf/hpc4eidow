@@ -101,14 +101,16 @@ REAL :: ran2
 
 
 ! Save Directory Name
-character(len = 15):: dir_name
+character(len=255):: arg
+character(len=:), allocatable:: dir_name
 !Command Line Arguments Needed ==> save directory
 IF(COMMAND_ARGUMENT_COUNT().NE.1)THEN
   WRITE(*,*)'ERROR, ONE COMMAND-LINE ARGUMENTS REQUIRED, STOPPING; MISSING SAVE DIRECTORY NAME'
   STOP
 ENDIF
-CALL GET_COMMAND_ARGUMENT(1, dir_name)   !first, read in the value
-WRITE (*,*) 'Saving Code to model/runs', dir_name
+CALL GET_COMMAND_ARGUMENT(1, arg)   !first, read in the value
+dir_name = TRIM(arg)
+WRITE (*,*) 'Saving Code to----', dir_name,'----'
 
 !Initialization
 value=10

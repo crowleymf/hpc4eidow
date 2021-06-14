@@ -1,11 +1,11 @@
-SUBROUTINE autocorrelate
+SUBROUTINE autocorrelate(dir_name)
 
 USE param
       
 IMPLICIT NONE
       
 INTEGER x, y, z, loop
-      
+character(len=*) :: dir_name      
 DOUBLE PRECISION autovelbin, autoetechain
 DOUBLE PRECISION autoetetot, autoveltot
 DOUBLE PRECISION autoete, autovel
@@ -24,9 +24,9 @@ IF (l==Nequil) THEN
   vyold(x)=avgvy(x)
  ENDDO
           
- OPEN(unit=70, file='tmpautocorrelate.tmp', form='unformatted') 
+ OPEN(unit=70, file=dir_name//'tmpautocorrelate.tmp', form='unformatted') 
   
- OPEN(unit=71, file='autocorrelatebox.dat', form='formatted')
+ OPEN(unit=71, file=dir_name//'autocorrelatebox.dat', form='formatted')
  WRITE(71,*) 'l,t,autoete,autovel'
  CLOSE(unit=71)
 ENDIF      
@@ -46,7 +46,7 @@ ENDDO
 autovel=autoveltot/dble(nx)
       
 IF (l==Nequil) THEN
- OPEN(unit=71, file='autocorrelatebox.dat', position='append')
+ OPEN(unit=71, file=dir_name//'autocorrelatebox.dat', position='append')
  WRITE(71,*) l, t, autoete, autovel 
  CLOSE(unit=71)
 ENDIF
@@ -69,7 +69,7 @@ IF (mod((l-Nequil),Nauto)==0 .AND. l/=Nequil) THEN
  autoetefinal=autoetesum/denom
  autovelfinal=autovelfinal/denom
   
- OPEN(unit=71, file='autocorrelatebox.dat', position='append')
+ OPEN(unit=71, file=dir_name//'autocorrelatebox.dat', position='append')
  WRITE(71,*) l,t,autoetefinal,autovelfinal 
  CLOSE (unit=71)
         

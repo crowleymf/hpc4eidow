@@ -1,19 +1,19 @@
 !This subroutine is used to generate the velocity profile.
-SUBROUTINE vel(xn,yn,zn,d)
+SUBROUTINE vel(xn,yn,zn,d, dir_name)
 
 USE param
 
 IMPLICIT NONE
-
+character(len=*) :: dir_name
 INTEGER :: x,y,z,xn,yn,zn
 INTEGER :: d
 
 !Initialization
 IF (t==0) THEN
- OPEN(unit=60,file='velocity_y.dat',status='unknown')
+ OPEN(unit=60,file=dir_name//'velocity_y.dat',status='unknown')
  CLOSE(unit=60)      
 
- OPEN(unit=61,file='velocity_x.dat',status='unknown')
+ OPEN(unit=61,file=dir_name//'velocity_x.dat',status='unknown')
  CLOSE(unit=61)
 
  DO x=1,nx
@@ -66,14 +66,14 @@ IF ((mod(l,maxsta)==0).AND.(l/=lold)) THEN
  END DO
 
 !Write out velocity values to data file
- OPEN(unit=60,file='velocity_y.dat',status='old',position='append')
+ OPEN(unit=60,file=dir_name//'velocity_y.dat',status='old',position='append')
   WRITE(60,*)'l=',l
   DO x=1,nx
    WRITE(60,*)x,avgvy(x)
   END DO
  CLOSE(unit=60) 
   
- OPEN(unit=61,file='velocity_x.dat',status='old',position='append')
+ OPEN(unit=61,file=dir_name//'velocity_x.dat',status='old',position='append')
   WRITE(61,*)'l=',l
   DO y=1,ny
    WRITE(61,*)y,avgvx(y)
