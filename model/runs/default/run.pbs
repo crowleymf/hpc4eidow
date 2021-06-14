@@ -29,4 +29,3 @@ time $polymix output/
 echo "removing model.out"
 rm model.out
 
-python golden_test.py
