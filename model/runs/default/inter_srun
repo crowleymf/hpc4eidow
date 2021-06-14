@@ -1,1 +1,0 @@
-srun --time=1:00:00 --account=hpc4eidow --ntasks=1 --partition=debug --pty $SHELL
