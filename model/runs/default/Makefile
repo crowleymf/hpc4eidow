@@ -9,4 +9,4 @@ b:
 	sbatch run.pbs
 
 clean:
-	rm -f *.tmp *.out *.tmp *.dat
+	rm -rf output/ *.tmp *.out *.tmp *.dat
