@@ -1,5 +1,6 @@
 SUBDIRS := $(wildcard */.)
 
+# Serial submission for local and batch jobs
 local: a 
 
 a:  
@@ -17,6 +18,3 @@ b:
 		sbatch run.pbs; \
 		cd ..; \
 	done
-
-clean:
-	rm -rf output/ *.tmp *.out *.tmp *.dat
