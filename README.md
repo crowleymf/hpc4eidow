@@ -23,7 +23,7 @@ source run.pbd
 # Directory structure
 
 ```text
-├── codes: holds the actual simulation codes
+─── codes: holds the actual simulation codes
 │   ├── PolyMix.f90: Main program that implements the Cooperative Motion Algorithm
 │   │   developed by Tadeusz Pakula;This program is for bipolar shear flow of linear chains.
 │   ├── autocorrelate.f90: ???

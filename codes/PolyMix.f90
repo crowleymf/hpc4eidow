@@ -98,6 +98,20 @@ INTEGER :: cr(code1,code,code), bn(code1,code1)
 INTEGER :: ds(code1),dm(code1)
 REAL :: ran2
 
+
+
+! Save Directory Name
+character(len=255):: arg
+character(len=:), allocatable:: dir_name
+!Command Line Arguments Needed ==> save directory
+IF(COMMAND_ARGUMENT_COUNT().NE.1)THEN
+  WRITE(*,*)'ERROR, ONE COMMAND-LINE ARGUMENTS REQUIRED, STOPPING; MISSING SAVE DIRECTORY NAME'
+  STOP
+ENDIF
+CALL GET_COMMAND_ARGUMENT(1, arg)   !first, read in the value
+dir_name = TRIM(arg)
+WRITE (*,*) 'Saving Code to----', dir_name,'----'
+
 !Initialization
 value=10
 l=0
@@ -220,10 +234,10 @@ DO i=1,nkt
 END DO
 
 !Call subroutines for initialization
-CALL chaincalcs
-CALL boxcalcs
-CALL chaindynamics
-CALL vel(xn,yn,zn,d)
+CALL chaincalcs(dir_name)
+CALL boxcalcs(dir_name)
+CALL chaindynamics(dir_name)
+CALL vel(xn,yn,zn,d, dir_name)
 
 
 !Beginning of the Monte Carlo routine
@@ -327,7 +341,7 @@ DO WHILE (l<maxloops)
 
  END IF
  
- CALL biasd(xn,d)
+ CALL biasd(xn,d, dir_name)
  
  tmk=t
  tcountmk=tcount
@@ -338,7 +352,7 @@ DO WHILE (l<maxloops)
  xnw=xnp(d,xn)
  
 4 IF ((xnw<1).OR.(xnw>nx)) THEN
-  CALL biasd(xn,d)
+  CALL biasd(xn,d, dir_name)
   xnw=xnp(d,xn)
   GO TO 4
  END IF
@@ -392,16 +406,16 @@ DO WHILE (l<maxloops)
   
   IF ((mod(tcount,value)==0).AND.(tcount/=0)) THEN
    value=value*1.30-modulo(value*1.30,1E0)
-  CALL chaindynamics
+  CALL chaindynamics(dir_name)
    tcount=0
   END IF
    
-  CALL biasd(xn,d)
+  CALL biasd(xn,d, dir_name)
  
   GO TO 3
  END IF
  
- CALL vel(xn,yn,zn,pp(dcon))
+ CALL vel(xn,yn,zn,pp(dcon),dir_name)
 
 !Recall e is the loop condition 
 
@@ -425,7 +439,7 @@ DO WHILE (l<maxloops)
 !Since this isn't one of the "Monte Carlo Moves" time is not incremented
 
 1 IF((xn<1).OR.(xn>nx)) THEN
-   CALL biasd(x,d)
+   CALL biasd(x,d,dir_name)
    xn=xnp(d,x)
    GO TO 1
   END IF
@@ -454,7 +468,7 @@ DO WHILE (l<maxloops)
 !If the move is possible, call the velocity routine. 
   
   IF (pat/=1) THEN
-   CALL vel(xn,yn,zn,d)
+   CALL vel(xn,yn,zn,d,dir_name)
   END IF
   
 !START OF THE MC MOVES
@@ -478,7 +492,7 @@ DO WHILE (l<maxloops)
 !Increment time and set the coordinate of the tv back to the "old" value.
   
   IF (pat==1) THEN
-   CALL biasd(x,d)
+   CALL biasd(x,d,dir_name)
    xn=x
    yn=y
    zn=z
@@ -585,7 +599,7 @@ DO WHILE (l<maxloops)
     yy(k)=y
     zz(k)=z
     
-    CALL biasd(xn,d)
+    CALL biasd(xn,d,dir_name)
    END IF
 
 !pat=7 represents leaving a chain at a=13 end
@@ -597,7 +611,7 @@ DO WHILE (l<maxloops)
    e=1
   ELSE
    a(x,y,z)=13
-   CALL biasd(xn,d)
+   CALL biasd(xn,d,dir_name)
   END IF
 
 !pat=8 represents rotation of a b=13 end.
@@ -635,7 +649,7 @@ DO WHILE (l<maxloops)
     yy(k)=y
     zz(k)=z
    END IF   
-   CALL biasd(xn,d)
+   CALL biasd(xn,d,dir_name)
    
    t=t+tu
    tcount=tcount+1
@@ -656,7 +670,7 @@ DO WHILE (l<maxloops)
    
    ket(x,y,z)=k
    
-   CALL biasd(xn,d)
+   CALL biasd(xn,d,dir_name)
    
    t=t+tu
    tcount=tcount+1
@@ -749,7 +763,7 @@ DO WHILE (l<maxloops)
    a(xb,yb,zb)=pp(cbn)
    ket(x,y,z)=k
    
-   CALL biasd(xn,d)
+   CALL biasd(xn,d,dir_name)
    
    t=t+tu
    tcount=tcount+1
@@ -775,7 +789,7 @@ DO WHILE (l<maxloops)
    
     b(xa,ya,za)=pp(can)
    
-    CALL biasd(xn,d)
+    CALL biasd(xn,d,dir_name)
    END IF
 
 !pat=14 represents leaving a chain at a kink in b-direction
@@ -795,7 +809,7 @@ DO WHILE (l<maxloops)
    
     a(xb,yb,zb)=pp(cbn)
    
-    CALL biasd(xn,d)
+    CALL biasd(xn,d,dir_name)
    END IF
 
 
@@ -812,7 +826,7 @@ DO WHILE (l<maxloops)
    
    ket(x,y,z)=k
    
-   CALL biasd(xn,d)
+   CALL biasd(xn,d,dir_name)
    
    t=t+tu
    tcount=tcount+1             
@@ -820,16 +834,16 @@ DO WHILE (l<maxloops)
   
   IF ((mod(tcount,value)==0).AND.(tcount/=0)) THEN
    value=value*1.30-modulo(value*1.30,1E0)
-  CALL chaindynamics
+  CALL chaindynamics(dir_name)
    tcount=0
   END IF
        
  END DO
  l=l+1
  
- CALL chaincalcs
+ CALL chaincalcs(dir_name)
  
- CALL boxcalcs
+ CALL boxcalcs(dir_name)
 
 !Bipolar shear flow update
  IF (l>=Nequil) THEN
@@ -848,7 +862,7 @@ DO x=1,nx
  pxz(x)=pzero
 END DO
 
-  CALL autocorrelate
+  CALL autocorrelate(dir_name)
   
  END IF
  
@@ -890,9 +904,9 @@ END DO
  
 END DO
 ! Final subroutine call
-CALL vel(xn,yn,zn,d)
+CALL vel(xn,yn,zn,d, dir_name)
 
-CALL chaindynamics
+CALL chaindynamics(dir_name)
 
 PRINT *,'Preparing to write out model file to disk for the final time'
 

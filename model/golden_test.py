@@ -7,7 +7,7 @@ filenames = [i[i.find('/')+1:] for i in filenames]
 class testFiles(unittest.TestCase):
     def test_exist(self):
         print("\n"+"=="*10+"start test_exist"+"=="*10)
-        second_run = glob.glob("temp_runs/*")
+        second_run = glob.glob("runs/default/output/*")
         second_run = [i[i.find("/")+1:] for i in second_run]
         for i in second_run:
             print("\tChecking {} ".format(i))
@@ -28,11 +28,11 @@ class testFiles(unittest.TestCase):
                 golden_file_data.close()
                 pass # Fond non-text data
             try:
-                second_file_data = open("temp_runs/{}".format(comparable_file))
+                second_file_data = open("runs/default/output/{}".format(comparable_file))
                 second_file_output = [line for line in second_file_data]
                 second_file_data.close()
             except UnicodeDecodeError:
-                print("\ttemp_runs/{} is binary file".format(comparable_file))
+                print("\truns/default/output/{} is binary file".format(comparable_file))
                 second_file_data.close()
                 pass # Fond non-text data
 

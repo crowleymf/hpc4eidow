@@ -2,13 +2,15 @@
 !displacement variables called g1, g2, g3, g4, g5. These variables track the 
 !motion of of various monomers. From these correlation functions we can 
 !obtain the dynamic "finger print" of the system
-SUBROUTINE chaindynamics
+SUBROUTINE chaindynamics(dir_name)
     
 USE param
 
 USE correlation    
 
 IMPLICIT NONE    
+
+character(len=*) :: dir_name
        
 INTEGER x, y, z    
       
@@ -28,23 +30,23 @@ DOUBLE PRECISION g5f, g5fsum, g5favg
 DOUBLE PRECISION g5l, g5lsum, g5lavg, g5avg
 !Initialization    
 IF (t==0) THEN
- OPEN (unit=90,file='g1.dat',form='formatted',status='unknown')
+ OPEN (unit=90,file=dir_name//'g1.dat',form='formatted',status='unknown')
  WRITE (90,200) 'l','t','g1'
  CLOSE (unit=90)
 
- OPEN (unit=91,file='g2.dat',form='formatted',status='unknown')
+ OPEN (unit=91,file=dir_name//'g2.dat',form='formatted',status='unknown')
  WRITE (91,200) 'l','t','g2'
  CLOSE (unit=91)
 
- OPEN (unit=92,file='g3.dat',form='formatted',status='unknown')
+ OPEN (unit=92,file=dir_name//'g3.dat',form='formatted',status='unknown')
  WRITE (92,200) 'l','t','g3'
  CLOSE (unit=92)
 
- OPEN (unit=93,file='g4.dat',form='formatted',status='unknown')
+ OPEN (unit=93,file=dir_name//'g4.dat',form='formatted',status='unknown')
  WRITE (93,200) 'l','t','g4'
  CLOSE (unit=93)
 
- OPEN (unit=94,file='g5.dat',form='formatted',status='unknown')
+ OPEN (unit=94,file=dir_name//'g5.dat',form='formatted',status='unknown')
  WRITE (94,200) 'l','t','g5'
  CLOSE (unit=94)
 
@@ -90,7 +92,7 @@ DO k=1,nkt
 !Find kth chain end and label as (x,y,z)
  x=xx(k)
  y=yy(k)
- z=zz(k)	
+ z=zz(k)
  
 !Setup calculation of mean-square displacement of chain end
  xnwf = dble(xd(k))
@@ -227,23 +229,23 @@ g5lavg=g5lsum/dnk
 g5avg=(g5favg+g5lavg)/2.D0
       
 !Write calculated data to files
-OPEN (unit=90,file='g1.dat',status='old',position='append')
+OPEN (unit=90,file=dir_name//'g1.dat',status='old',position='append')
 WRITE (90,201) l, t, g1avg
 CLOSE (unit=90)
 
-OPEN (unit=91,file='g2.dat',status='old',position='append')
+OPEN (unit=91,file=dir_name//'g2.dat',status='old',position='append')
 WRITE (91,201) l, t, g2avg
 CLOSE (unit=91)
 
-OPEN (unit=92,file='g3.dat',status='old',position='append')
+OPEN (unit=92,file=dir_name//'g3.dat',status='old',position='append')
 WRITE (92,201) l, t, g3avg
 CLOSE (unit=92)
 
-OPEN (unit=93,file='g4.dat',status='old',position='append')
+OPEN (unit=93,file=dir_name//'g4.dat',status='old',position='append')
 WRITE (93,201) l, t, g4avg
 CLOSE (unit=93)
 
-OPEN (unit=94,file='g5.dat',status='old',position='append')
+OPEN (unit=94,file=dir_name//'g5.dat',status='old',position='append')
 WRITE (94,201) l, t, g5avg
 CLOSE (unit=94)
 

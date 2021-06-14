@@ -9,28 +9,23 @@
 
 SCRIPT_LOCATION="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
-cd $SCRIPT_LOCATION/../codes
-echo "Navigated to "$SCRIPT_LOCATION'/../codes'
-module load gcc
+cd $SCRIPT_LOCATION/../../../codes
+echo "Navigated to "$SCRIPT_LOCATION'/../../../codes'
 make clean
 make all
 echo "Finished building PolyMix"
 
-cd $SCRIPT_LOCATION'/../model'
-echo "Navigated to " $SCRIPT_LOCATION'/../model'
-polymix=$SCRIPT_LOCATION'/../codes/PolyMix'
+cd $SCRIPT_LOCATION
+echo "Navigated to " $SCRIPT_LOCATION
+polymix=$SCRIPT_LOCATION'/../../../codes/PolyMix'
 
 echo "Unzipping the model.out file"
 unzip -o model.out.zip
 
 echo "Running PolyMix " $polymix
-time srun $polymix > sys1.out
+mkdir output
+time $polymix output/
 
 echo "removing model.out"
 rm model.out
 
-
-mkdir temp_runs
-mv *dat temp_runs
-mv *tmp temp_runs
-python golden_test.py

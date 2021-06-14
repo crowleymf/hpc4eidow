@@ -1,9 +1,10 @@
 !The subroutine presented here is used to calculate the stress, lattice site density and segmental density.
-SUBROUTINE boxcalcs
+SUBROUTINE boxcalcs(dir_name)
       
 USE param
       
 IMPLICIT NONE
+character(len=*) :: dir_name
 
 INTEGER :: x,y,z 
 INTEGER :: loop,length,point,boxcount,count
@@ -56,24 +57,24 @@ ALLOCATE (segdensity1(nx),segdensity2(nx),segdensity3(nx),segdensity4(nx),segden
       
 IF (t==0) THEN
       
- OPEN(unit=51, file='tmpstressbox.tmp', form='unformatted') 
- OPEN(unit=52, file='tmpstressbin.tmp', form='unformatted')
- OPEN(unit=53, file='tmpdensity.tmp', form='unformatted')
- OPEN(unit=54, file='tmpsegdensity.tmp',form='unformatted')
+ OPEN(unit=51, file=dir_name//'tmpstressbox.tmp', form='unformatted') 
+ OPEN(unit=52, file=dir_name//'tmpstressbin.tmp', form='unformatted')
+ OPEN(unit=53, file=dir_name//'tmpdensity.tmp', form='unformatted')
+ OPEN(unit=54, file=dir_name//'tmpsegdensity.tmp',form='unformatted')
         
- OPEN(unit=55, file='stressbox.dat', form='formatted')
+ OPEN(unit=55, file=dir_name//'stressbox.dat', form='formatted')
  WRITE(55,400) 'l', 'sxy', 'sxz', 'syz', 'sxx', 'syy', 'szz'     
  CLOSE(unit=55)
         
- OPEN(unit=56, file='stressbin.dat', form='formatted')
+ OPEN(unit=56, file=dir_name//'stressbin.dat', form='formatted')
  WRITE(56,400) 'x', 'sxy', 'sxz', 'syz', 'sxx', 'syy', 'szz'
  CLOSE(unit=56)
         
- OPEN(unit=57, file='latticedensity.dat', form='formatted')
+ OPEN(unit=57, file=dir_name//'latticedensity.dat', form='formatted')
  WRITE(57,401) 'x', 'density1', 'density2', 'density3', 'density4', 'density5', 'density6', 'density7', 'density8'
  CLOSE(unit=57)
   
- OPEN(unit=58, file='segmentdensity.dat', form='formatted')
+ OPEN(unit=58, file=dir_name//'segmentdensity.dat', form='formatted')
  WRITE(58,401) 'x', 'segdensity2', 'segdensity2', 'segdensity3', &
                     'segdensity4', 'segdensity5', 'segdensity6', 'segdensity7', 'segdensity8'
  CLOSE(unit=58)   
@@ -361,17 +362,17 @@ IF (mod(l,maxsta) == 0 .AND. l /= 0) THEN
  REWIND(53)
  REWIND(54)
         
- OPEN(unit=55, file='stressbox.dat', position='append')
+ OPEN(unit=55, file=dir_name//'stressbox.dat', position='append')
  WRITE(55,402) l, sxyfinal, sxzfinal, syzfinal, sxxfinal, syyfinal, szzfinal 
  CLOSE(unit=55)
         
- OPEN(unit=56, file='stressbin.dat', position='append')
+ OPEN(unit=56, file=dir_name//'stressbin.dat', position='append')
  WRITE(56,*) 'l=', l
         
- OPEN(unit=57, file='latticedensity.dat', position='append')
+ OPEN(unit=57, file=dir_name//'latticedensity.dat', position='append')
  WRITE(57,*) 'l=', l
    
- OPEN(unit=58, file='segmentdensity.dat', position='append')
+ OPEN(unit=58, file=dir_name//'segmentdensity.dat', position='append')
  WRITE(58,*) 'l=', l, 't=', t
         
  DO x = 1, nx
