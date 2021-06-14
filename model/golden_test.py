@@ -8,7 +8,7 @@ class testFiles(unittest.TestCase):
     def test_exist(self):
         print("\n"+"=="*10+"start test_exist"+"=="*10)
         second_run = glob.glob("runs/default/output/*")
-        second_run = [i[i.find("/")+1:] for i in second_run]
+        second_run = [i[i.rfind("/")+1:] for i in second_run]
         for i in second_run:
             print("\tChecking {} ".format(i))
             self.assertTrue(i in filenames, "{} does not exist".format(i))
