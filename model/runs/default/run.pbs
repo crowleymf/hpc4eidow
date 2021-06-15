@@ -20,11 +20,11 @@ echo "Navigated to " $SCRIPT_LOCATION
 polymix=$SCRIPT_LOCATION'/../../../codes/PolyMix'
 
 echo "Unzipping the model.out file"
-unzip -o model.out.zip
+unzip -o  -q model.out.zip
 
 echo "Running PolyMix " $polymix
 mkdir output
-time $polymix output/
+time $polymix output/ 2>&1 | tee log.txt 
 
 echo "removing model.out"
 rm model.out
