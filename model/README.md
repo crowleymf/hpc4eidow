@@ -2,7 +2,20 @@
 
 This folder holds the simulation configurations of different runs
 
+# Adding a run
+In order to add a run copy the "debug" folder in the same directory with a new unique name describing the simulations
 
+Then update the config.in and data.in to change the simulation parameters; you can also replace model.out.zip with a zip of the file you would like to use (please keep the same name).
+
+# Running multiple simulations in parallel on a single node
+within the /mode/run directory you can run the command ```bash make all``` to run all simulations in parallel
+
+
+# Submitting multiple simulations as batch jobs
+within the /mode/run directory you can run the command ```bash make batch``` to submit all simulations to SLURM
+
+
+# Directory
 ```text
 |── golden: Output files for unit testing
 ├── runs: Folder to put individual simulation configurations (single simulation per  folder)
