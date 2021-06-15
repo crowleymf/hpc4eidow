@@ -5,8 +5,8 @@ local: a
 
 a:  
 	for dir in $(SUBDIRS); do \
-		cd $$dir; \
-		./run.pbs; \
+	        cd $$dir; \
+		./run.pbs & \
 		cd ..; \
 	done
 
