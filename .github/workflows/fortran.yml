@@ -15,8 +15,8 @@ jobs:
     - uses: actions/checkout@v2
     - name: model
       run: 
-        cd model
-        ls
-        pwd
+        cd model;
+        ls;
+        pwd;
     - name: make
       run: make
