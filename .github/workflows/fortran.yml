@@ -18,9 +18,7 @@ jobs:
     - name: model
       run: 
         cd model;
-        cd runs;
+        cd runs/default;
         ls;
         pwd;
-        cat Makefile;
-    - name: make
-      run: make
+        ./run.pdb;
