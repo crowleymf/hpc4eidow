@@ -16,8 +16,9 @@ jobs:
     - name: model
       run: 
         cd model;
+        cd runs;
         ls;
         pwd;
-        cd runs;
+        cat Makefile;
     - name: make
       run: make
