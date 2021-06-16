@@ -13,6 +13,8 @@ cd $SCRIPT_LOCATION/../../../codes
 echo "Navigated to "$SCRIPT_LOCATION'/../../../codes'
 make clean
 make all
+ls
+pwd
 echo "Finished building PolyMix"
 
 cd $SCRIPT_LOCATION
