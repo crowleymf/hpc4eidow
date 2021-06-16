@@ -23,6 +23,7 @@ jobs:
         cd runs/default;
         ls;
         pwd;
+        make local;
         ./run.pbs;
         cd ../..;
         python golden_test.py
