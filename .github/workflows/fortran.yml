@@ -13,8 +13,10 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+
     - name: setup dependencies
       run: sudo apt-get -y install gfortran build-essential
+
     - name: model
       run: 
         cd model;
@@ -22,3 +24,5 @@ jobs:
         ls;
         pwd;
         ./run.pbs;
+        cd ../..;
+        python golden_test.py
