@@ -1,3 +1,6 @@
+[![Build, run and test](https://github.com/jamilgafur/hpc4eidow/actions/workflows/fortran.yml/badge.svg)](https://github.com/jamilgafur/hpc4eidow/actions/workflows/fortran.yml)
+
+
 # Allocating an Interactive Node on Eagle
 
 ```bash
