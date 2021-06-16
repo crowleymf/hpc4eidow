@@ -21,4 +21,4 @@ jobs:
         cd runs/default;
         ls;
         pwd;
-        ./run.pdb;
+        ./run.pbs;
