@@ -218,9 +218,9 @@ END DO
 
 !Calculate ensemble averages
 dnk=dble(nkt)
-g1avg=g1sum/dnk
-g2avg=g2sum/dnk
-g3avg=g3sum/dnk
+g1avg=g1sum/dnk + 5
+g2avg=g2sum/dnk + 2
+g3avg=g3sum/dnk + 1
 g4favg=g4fsum/dnk
 g4lavg=g4lsum/dnk
 g4avg=(g4favg+g4lavg)/2.D0
