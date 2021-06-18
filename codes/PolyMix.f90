@@ -2,6 +2,8 @@
 !Algorithm originally developed by Tadeusz Pakula.
 !This program is for bipolar shear flow of linear chains.
 MODULE param
+USE OMP_LIB
+
 !Box sizes
 INTEGER :: nx, ny, nz, nkt
 !Different chain lengths
@@ -58,7 +60,7 @@ DOUBLE PRECISION,ALLOCATABLE :: sumvy(:),sumvx(:)
 DOUBLE PRECISION,ALLOCATABLE :: ete(:)
 DOUBLE PRECISION,ALLOCATABLE :: vyold(:),eteold(:)
 
-!Variable for averaging 
+!Variable for averaging
 DOUBLE PRECISION :: denom
 
 END MODULE param
@@ -67,7 +69,7 @@ END MODULE param
 MODULE correlation
  INTEGER,ALLOCATABLE :: x0cm(:),y0cm(:),z0cm(:)
  DOUBLE PRECISION,ALLOCATABLE :: x0com(:),y0com(:),z0com(:)
- DOUBLE PRECISION,ALLOCATABLE :: x0nwf(:),y0nwf(:),z0nwf(:) 
+ DOUBLE PRECISION,ALLOCATABLE :: x0nwf(:),y0nwf(:),z0nwf(:)
  DOUBLE PRECISION,ALLOCATABLE :: x0nwl(:),y0nwl(:),z0nwl(:)
 END MODULE correlation
 PROGRAM PolyMix
@@ -112,6 +114,12 @@ CALL GET_COMMAND_ARGUMENT(1, arg)   !first, read in the value
 dir_name = TRIM(arg)
 WRITE (*,*) 'Saving Code to----', dir_name,'----'
 
+
+! Check OMP working
+!$OMP PARALLEL
+WRITE (*,*) 'Hello from process: ', OMP_GET_THREAD_NUM()
+!$OMP END PARALLEL
+
 !Initialization
 value=10
 l=0
@@ -131,7 +139,7 @@ OPEN (unit=14,file='data.in',status='old')
  READ (14,*) pnew
 CLOSE (unit=14)
 
-!Read FCC lattice configuration data from 'conf.in' 
+!Read FCC lattice configuration data from 'conf.in'
 OPEN(unit=15,file='conf.in',status='old')
 
 DO i=1,13
@@ -143,7 +151,7 @@ DO i=1,13
 END DO
 
 DO i=1,12
- READ (15,*) (bn(i,j),j=1,12) 
+ READ (15,*) (bn(i,j),j=1,12)
 END DO
 
 DO i=1,12
@@ -272,7 +280,7 @@ DO WHILE (l<maxloops)
 
  k=nkt+1
  e=0
- 
+
 !c=4 represents a kink.
 !Remove a chain segment and label an adjacent segment.
 !Which adjacent segment to label is chosen randomly.
@@ -280,23 +288,23 @@ DO WHILE (l<maxloops)
  IF (c==4) THEN
   da=a(xn,yn,zn)
   db=b(xn,yn,zn)
-  
+
   xa=xnp(da,xn)
   ya=ynp(da,yn)
   za=znp(da,zn)
-  
+
   xb=xnp(db,xn)
   yb=ynp(db,yn)
   zb=znp(db,zn)
-  
+
   ba=bn(da,db)
   a(xb,yb,zb)=ba
   b(xa,ya,za)=pp(ba)
-  
+
   IF (ran2(iseed)>0.5D0) THEN
    ket(xa,ya,za)=k
    dcon=da
-  ELSE 
+  ELSE
    ket(xb,yb,zb)=k
    dcon=db
   END IF
@@ -310,20 +318,20 @@ DO WHILE (l<maxloops)
   x=xnp(d,xn)
   y=ynp(d,yn)
   z=znp(d,zn)
-  
+
   b(x,y,z)=13
   ket(x,y,z)=k
-  
+
   dcon=d
 
   xd(k0)=xd(k0)+px(dcon)
   yd(k0)=yd(k0)+py(dcon)
   zd(k0)=zd(k0)+pz(dcon)
- 
+
   xx(k0)=x
   yy(k0)=y
   zz(k0)=z
-  
+
 !c=6 specifies a chain end at a=13
 !Shorten the chain by one and label the end of the chain
 !position with a value of k=nk+1 for the chain number.
@@ -332,17 +340,17 @@ DO WHILE (l<maxloops)
   d=b(xn,yn,zn)
   x=xnp(d,xn)
   y=ynp(d,yn)
-  z=znp(d,zn) 
-  
+  z=znp(d,zn)
+
   a(x,y,z)=13
   ket(x,y,z)=k
-  
+
   dcon=d
 
  END IF
- 
+
  CALL biasd(xn,d, dir_name)
- 
+
  tmk=t
  tcountmk=tcount
  valuemk=value
@@ -350,7 +358,7 @@ DO WHILE (l<maxloops)
 3 CONTINUE
 
  xnw=xnp(d,xn)
- 
+
 4 IF ((xnw<1).OR.(xnw>nx)) THEN
   CALL biasd(xn,d, dir_name)
   xnw=xnp(d,xn)
@@ -358,25 +366,25 @@ DO WHILE (l<maxloops)
  END IF
  ynw=ynp(d,yn)
  znw=znp(d,zn)
-  
+
  paw=a(xnw,ynw,znw)
  pbw=b(xnw,ynw,znw)
  patw=cr(d,paw,pbw)
-  
+
  kw=ket(xnw,ynw,znw)
-  
+
  IF (kw==nkt+1) THEN
   IF (c==4) THEN
    IF (ket(xa,ya,za)==nkt+1) THEN
     a(xb,yb,zb)=pp(db)
     b(xa,ya,za)=pp(da)
-    ket(xa,ya,za)=k0   
+    ket(xa,ya,za)=k0
    ELSE
     a(xb,yb,zb)=pp(db)
     b(xa,ya,za)=pp(da)
     ket(xb,yb,zb)=k0
    END IF
-   
+
   ELSEIF (c==5) THEN
    b(x,y,z)=pp(dcon)
    ket(x,y,z)=k0
@@ -384,7 +392,7 @@ DO WHILE (l<maxloops)
    xd(k0)=xd(k0)+qx(dcon)
    yd(k0)=yd(k0)+qy(dcon)
    zd(k0)=zd(k0)+qz(dcon)
- 
+
    xx(k0)=xn
    yy(k0)=yn
    zz(k0)=zn
@@ -393,42 +401,42 @@ DO WHILE (l<maxloops)
    a(x,y,z)=pp(dcon)
    ket(x,y,z)=k0
   END IF
-  
+
   t=tmk
   tcount=tcountmk
   value=valuemk
-  
-  GO TO 2 
- 
+
+  GO TO 2
+
  ELSEIF (patw==1) THEN
   t=t+tu
   tcount=tcount+1
-  
+
   IF ((mod(tcount,value)==0).AND.(tcount/=0)) THEN
    value=value*1.30-modulo(value*1.30,1E0)
   CALL chaindynamics(dir_name)
    tcount=0
   END IF
-   
+
   CALL biasd(xn,d, dir_name)
- 
+
   GO TO 3
  END IF
- 
+
  CALL vel(xn,yn,zn,pp(dcon),dir_name)
 
-!Recall e is the loop condition 
+!Recall e is the loop condition
 
  DO WHILE (e/=1)
   x=xn
   y=yn
   z=zn
- 
+
 !Based on the "old" coordinate and the d-code, obtain the "new"
-!trial position (xn,yn,zn) for the tv.  
- 
+!trial position (xn,yn,zn) for the tv.
+
   xn=xnp(d,x)
-  
+
 !If the move is through one of the walls, select a new direction.
 !Repeat until the tv is not moving through the wall.
 
@@ -443,10 +451,10 @@ DO WHILE (l<maxloops)
    xn=xnp(d,x)
    GO TO 1
   END IF
-  
+
 !If walls were set up in other directions in MODLAY, include IF-THEN blocks
 !equivalent to the above block for x
-  
+
   yn=ynp(d,y)
   zn=znp(d,z)
 
@@ -465,16 +473,16 @@ DO WHILE (l<maxloops)
 
   k=ket(xn,yn,zn)
 
-!If the move is possible, call the velocity routine. 
-  
+!If the move is possible, call the velocity routine.
+
   IF (pat/=1) THEN
    CALL vel(xn,yn,zn,d,dir_name)
   END IF
-  
+
 !START OF THE MC MOVES
 
 !Time increments are added only upon entry of the tv into a new chain.
-  
+
 !If the tv stays within the same chain, time is not incremented.
 !Sections of a chain which can move are "movable groups"; time is incremented
 !when a movable group is moved, not when each segment is moved.
@@ -484,27 +492,27 @@ DO WHILE (l<maxloops)
 !checking if the chain number is greater than the total number of chains
 !if so this is where the TV was created, e is now 1 and the original
 !chain number is returned
- 
+
 !pat=1 is an impossible move
 !This impossible move is two bonds being simultaneously stretched
 !when the TV attempts to step on a kink with a bond angle of 60 degrees
 !Generate a new "random" directional code.
 !Increment time and set the coordinate of the tv back to the "old" value.
-  
+
   IF (pat==1) THEN
    CALL biasd(x,d,dir_name)
    xn=x
    yn=y
    zn=z
-   
+
    t=t+tu
    tcount=tcount+1
-   
+
 !pat=2 represents a move along the chain in a-direction.
 !Set the direction of the d code coincident with a.
 !Time is not incremented because this is a continuation movement;
-!it is part of the movement of a movable group.  
- 
+!it is part of the movement of a movable group.
+
   ELSE IF (pat==2) THEN
    d=pa
    IF (k>nkt) THEN
@@ -514,7 +522,7 @@ DO WHILE (l<maxloops)
 
 !pat=3 represents a move along the chain in b-direction
 !Set the direction of the d code coincident with b.
-   
+
   ELSE IF (pat==3) THEN
      d=pb
    IF (k>nkt) THEN
@@ -535,7 +543,7 @@ DO WHILE (l<maxloops)
     e=1
     k=k0
    END IF
-   
+
    xd(k)=xd(k)+qx(d)
    yd(k)=yd(k)+qy(d)
    zd(k)=zd(k)+qz(d)
@@ -543,11 +551,11 @@ DO WHILE (l<maxloops)
    xx(k)=x
    yy(k)=y
    zz(k)=z
-   
+
    ket(x,y,z)=k
-   
+
    d=pa
-   
+
    t=t+tu
    tcount=tcount+1
 
@@ -567,11 +575,11 @@ DO WHILE (l<maxloops)
     e=1
     k=k0
    END IF
-   
+
    ket(x,y,z)=k
-   
+
    d=pb
-   
+
    t=t+tu
    tcount=tcount+1
 
@@ -579,7 +587,7 @@ DO WHILE (l<maxloops)
 !Generate a new "random" directional code.
 !Time is not incremented because this is a continuation movement;
 !it completes the movement of a movable group.
-    
+
   ELSE IF (pat==6) THEN
    IF (k>nkt) THEN
     ket(xn,yn,zn)=k0
@@ -588,17 +596,17 @@ DO WHILE (l<maxloops)
     yy(k0)=yn
     zz(k0)=zn
    ELSE
-    
+
     b(x,y,z)=13
-    
+
     xd(k)=xd(k)+qx(d)
     yd(k)=yd(k)+qy(d)
     zd(k)=zd(k)+qz(d)
-    
+
     xx(k)=x
     yy(k)=y
     zz(k)=z
-    
+
     CALL biasd(xn,d,dir_name)
    END IF
 
@@ -617,26 +625,26 @@ DO WHILE (l<maxloops)
 !pat=8 represents rotation of a b=13 end.
 !Generate a new "random" directional code.
 !The chain end flip comprises a movable group move so time is incremented
-  
+
   ELSE IF (pat==8) THEN
    can=cn(d,pa)
    a(x,y,z)=can
-   
+
    xa=xnp(pa,xn)
    ya=ynp(pa,yn)
    za=znp(pa,zn)
-   
+
    b(xa,ya,za)=pp(can)
-   
+
    b(x,y,z)=13
-   
+
    ket(x,y,z)=k
-   
-   IF (k>nkt) THEN     
+
+   IF (k>nkt) THEN
     xd(k0)=xd(k0)+qx(d)
     yd(k0)=yd(k0)+qy(d)
-    zd(k0)=zd(k0)+qz(d) 
-    
+    zd(k0)=zd(k0)+qz(d)
+
     xx(k0)=x
     yy(k0)=y
     zz(k0)=z
@@ -644,34 +652,34 @@ DO WHILE (l<maxloops)
     xd(k)=xd(k)+qx(d)
     yd(k)=yd(k)+qy(d)
     zd(k)=zd(k)+qz(d)
-   
+
     xx(k)=x
     yy(k)=y
     zz(k)=z
-   END IF   
+   END IF
    CALL biasd(xn,d,dir_name)
-   
+
    t=t+tu
    tcount=tcount+1
 
 !pat=9 represents rotation of an a=13 end.
- 
+
   ELSE IF (pat==9) THEN
    cbn=cn(d,pb)
    b(x,y,z)=cbn
-   
+
    xb=xnp(pb,xn)
    yb=ynp(pb,yn)
    zb=znp(pb,zn)
-   
+
    a(xb,yb,zb)=pp(cbn)
-   
+
    a(x,y,z)=13
-   
+
    ket(x,y,z)=k
-   
+
    CALL biasd(xn,d,dir_name)
-   
+
    t=t+tu
    tcount=tcount+1
 
@@ -686,57 +694,57 @@ DO WHILE (l<maxloops)
    can=cn(d,pa)
    a(x,y,z)=can
    b(x,y,z)=d
-   
+
    xa=xnp(pa,xn)
    ya=ynp(pa,yn)
    za=znp(pa,zn)
-   
+
    b(xa,ya,za)=pp(can)
-   
+
    a(xn,yn,zn)=pp(d)
-   
+
    IF (k>nkt) THEN
     ket(xn,yn,zn)=k0
     k=k0
     e=1
    END IF
-   
+
    ket(x,y,z)=k
-   
+
    d=pb
-   
+
    t=t+tu
    tcount=tcount+1
-   
-!pat=11 represents entry into a chain at a kink in a-direction 
+
+!pat=11 represents entry into a chain at a kink in a-direction
 
   ELSE IF (pat==11) THEN
    cbn=cn(d,pb)
    b(x,y,z)=cbn
    a(x,y,z)=d
-   
+
    xb=xnp(pb,xn)
    yb=ynp(pb,yn)
    zb=znp(pb,zn)
-   
+
    a(xb,yb,zb)=pp(cbn)
-   
+
    b(xn,yn,zn)=pp(d)
-   
+
    IF (k>nkt) THEN
     ket(xn,yn,zn)=k0
     k=k0
     e=1
    END IF
-   
+
    ket(x,y,z)=k
-   
+
    d=pa
-   
+
    t=t+tu
    tcount=tcount+1
- 
- 
+
+
 !pat=12 represents two-bond rotation.
 !Generate a new "random" directional code.
 !This "crankshaft" type move moves a movable group so time is incremented
@@ -746,25 +754,25 @@ DO WHILE (l<maxloops)
   ELSE IF (pat==12) THEN
    can=cn(d,pa)
    a(x,y,z)=can
-   
+
    xa=xnp(pa,xn)
    ya=ynp(pa,yn)
    za=znp(pa,zn)
-   
+
    b(xa,ya,za)=pp(can)
-   
+
    cbn=cn(d,pb)
    b(x,y,z)=cbn
 
    xb=xnp(pb,xn)
    yb=ynp(pb,yn)
    zb=znp(pb,zn)
-   
+
    a(xb,yb,zb)=pp(cbn)
    ket(x,y,z)=k
-   
+
    CALL biasd(xn,d,dir_name)
-   
+
    t=t+tu
    tcount=tcount+1
 
@@ -773,7 +781,7 @@ DO WHILE (l<maxloops)
 !Time is not incremented because this is a continuation movement;
 !it completes the movement of a movable group.
 !This move is the opposite of entering at the kink.
-  
+
   ELSE IF (pat==13) THEN
    IF (k>nkt)THEN
     ket(xn,yn,zn)=k0
@@ -782,18 +790,18 @@ DO WHILE (l<maxloops)
    Else
     can=cn(d,pa)
     a(x,y,z)=can
-   
+
     xa=xnp(pa,xn)
     ya=ynp(pa,yn)
     za=znp(pa,zn)
-   
+
     b(xa,ya,za)=pp(can)
-   
+
     CALL biasd(xn,d,dir_name)
    END IF
 
 !pat=14 represents leaving a chain at a kink in b-direction
- 
+
   ELSE IF (pat==14) THEN
    IF (k>nkt)THEN
     ket(xn,yn,zn)=k0
@@ -802,13 +810,13 @@ DO WHILE (l<maxloops)
    ELSE
     cbn=cn(d,pb)
     b(x,y,z)=cbn
-   
+
     xb=xnp(pb,xn)
     yb=ynp(pb,yn)
     zb=znp(pb,zn)
-   
+
     a(xb,yb,zb)=pp(cbn)
-   
+
     CALL biasd(xn,d,dir_name)
    END IF
 
@@ -819,30 +827,30 @@ DO WHILE (l<maxloops)
   ELSE IF (pat==15) THEN
    a(x,y,z)=13
    b(x,y,z)=13
-   
+
    xx(k)=x
    yy(k)=y
    zz(k)=z
-   
+
    ket(x,y,z)=k
-   
+
    CALL biasd(xn,d,dir_name)
-   
+
    t=t+tu
-   tcount=tcount+1             
+   tcount=tcount+1
   END IF
-  
+
   IF ((mod(tcount,value)==0).AND.(tcount/=0)) THEN
    value=value*1.30-modulo(value*1.30,1E0)
   CALL chaindynamics(dir_name)
    tcount=0
   END IF
-       
+
  END DO
  l=l+1
- 
+
  CALL chaincalcs(dir_name)
- 
+
  CALL boxcalcs(dir_name)
 
 !Bipolar shear flow update
@@ -854,7 +862,7 @@ DO WHILE (l<maxloops)
 !   pmy(x)=pzero*(1.D0-pnew*xdiv)
 !   pxz(x)=pzero
 !  END DO
-  
+
 DO x=1,nx
  xdiv=dble(x-1)/dble(nx-1)
  ppy(x)=pzero-pnew*(xdiv-xdiv*xdiv)
@@ -863,9 +871,9 @@ DO x=1,nx
 END DO
 
   CALL autocorrelate(dir_name)
-  
+
  END IF
- 
+
 !Output the undated model
  IF (mod(l,maxsta)==0) THEN
   PRINT *,'Writing model file to disk after every maxsta loops'
@@ -901,7 +909,7 @@ END DO
   END DO
   CLOSE(unit=21)
  END IF
- 
+
 END DO
 ! Final subroutine call
 CALL vel(xn,yn,zn,d, dir_name)
@@ -943,12 +951,12 @@ DO i=1,nkt
 END DO
 CLOSE(unit=21)
 
-100 FORMAT(1024(I8,x))   
+100 FORMAT(1024(I8,x))
 
 END PROGRAM PolyMix
 
 !This function is the random number generator used for all simulation.
-!Function from numerical recipies      
+!Function from numerical recipies
     FUNCTION ran2(idum)
       INTEGER idum, im1, im2, imm1, ia1, ia2, iq1, iq2, ir1, ir2, ntab, ndiv
       REAL ran2, am, eps, rnmx
