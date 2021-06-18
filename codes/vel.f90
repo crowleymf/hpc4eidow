@@ -11,11 +11,11 @@ INTEGER :: d
 !Initialization
 IF (t==0) THEN
  OPEN(unit=60,file=dir_name//'velocity_y.dat',status='unknown')
- CLOSE(unit=60)      
+ CLOSE(unit=60)
 
  OPEN(unit=61,file=dir_name//'velocity_x.dat',status='unknown')
  CLOSE(unit=61)
-
+ !$OMP DO
  DO x=1,nx
   DO y=1,ny
    DO z=1,nz
@@ -26,12 +26,13 @@ IF (t==0) THEN
    END DO
   END DO
  END DO
+ !$OMP END DO
  lold=0
 END IF
 
 !If maxsta loops have been reached, write out the updated velocities
 IF ((mod(l,maxsta)==0).AND.(l/=lold)) THEN
- 
+
  DO x=1,nx
   DO y=1,ny
    DO z=1,nz
@@ -40,7 +41,7 @@ IF ((mod(l,maxsta)==0).AND.(l/=lold)) THEN
    END DO
   END DO
  END DO
- 
+
  DO x=1,nx
   sumvy(x)=0.D0
   avgvy(x)=0.D0
@@ -49,11 +50,11 @@ IF ((mod(l,maxsta)==0).AND.(l/=lold)) THEN
     sumvy(x)=sumvy(x)+vy(x,y,z)
    END DO
   END DO
-!The average value for the velocity of a given yz-plane is the total velocity divided by 
+!The average value for the velocity of a given yz-plane is the total velocity divided by
 !the number of lattice sites in a plane (ny*nz/2).
    avgvy(x)=sumvy(x)/dble((ny*nz/2))
  END DO
- 
+
  DO y=1,ny
   sumvx(y)=0.D0
   avgvx(y)=0.D0
@@ -71,14 +72,14 @@ IF ((mod(l,maxsta)==0).AND.(l/=lold)) THEN
   DO x=1,nx
    WRITE(60,*)x,avgvy(x)
   END DO
- CLOSE(unit=60) 
-  
+ CLOSE(unit=60)
+
  OPEN(unit=61,file=dir_name//'velocity_x.dat',status='old',position='append')
   WRITE(61,*)'l=',l
   DO y=1,ny
    WRITE(61,*)y,avgvx(y)
   END DO
- CLOSE(unit=61) 
+ CLOSE(unit=61)
  lold=l
 END IF
 
