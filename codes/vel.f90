@@ -8,8 +8,6 @@ character(len=*) :: dir_name
 INTEGER :: x,y,z,xn,yn,zn
 INTEGER :: d
 
-! Check OMP working
-
 !Initialization
 IF (t==0) THEN
  OPEN(unit=60,file=dir_name//'velocity_y.dat',status='unknown')
@@ -17,8 +15,7 @@ IF (t==0) THEN
 
  OPEN(unit=61,file=dir_name//'velocity_x.dat',status='unknown')
  CLOSE(unit=61)
- !$OMP PARALLEL
- !$OMP DO
+ !$OMP PARALLEL DO COLLAPSE(3)
  DO x=1,nx
   DO y=1,ny
    DO z=1,nz
@@ -29,15 +26,14 @@ IF (t==0) THEN
    END DO
   END DO
  END DO
- !$OMP END DO
- !$OMP END PARALLEL
+ !$OMP END PARALLEL DO
  lold=0
 END IF
 
 !If maxsta loops have been reached, write out the updated velocities
 IF ((mod(l,maxsta)==0).AND.(l/=lold)) THEN
  !$OMP PARALLEL
- !$OMP DO 
+ !$OMP DO COLLAPSE(3) 
  DO x=1,nx
   DO y=1,ny
    DO z=1,nz
@@ -77,18 +73,22 @@ IF ((mod(l,maxsta)==0).AND.(l/=lold)) THEN
  END DO
  !$OMP END DO
  !Write out velocity values to data file
+ !$OMP SECTIONS 
+ !$OMP SECTION
  OPEN(unit=60,file=dir_name//'velocity_y.dat',status='old',position='append')
   WRITE(60,*)'l=',l
   DO x=1,nx
    WRITE(60,*)x,avgvy(x)
   END DO
  CLOSE(unit=60)
+ !$OMP SECTION
  OPEN(unit=61,file=dir_name//'velocity_x.dat',status='old',position='append')
   WRITE(61,*)'l=',l
   DO y=1,ny
    WRITE(61,*)y,avgvx(y)
   END DO
  CLOSE(unit=61)
+ !$OMP END SECTIONS
  lold=l
 END IF
 
