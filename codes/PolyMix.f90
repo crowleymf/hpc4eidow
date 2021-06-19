@@ -114,11 +114,12 @@ CALL GET_COMMAND_ARGUMENT(1, arg)   !first, read in the value
 dir_name = TRIM(arg)
 WRITE (*,*) 'Saving Code to----', dir_name,'----'
 
-
 ! Check OMP working
+WRITE (*,*) 'PolyMix'
 !$OMP PARALLEL
-WRITE (*,*) 'Hello from process: ', OMP_GET_THREAD_NUM()
+WRITE (*,*) 'Hello from parallel process: ', OMP_GET_THREAD_NUM()
 !$OMP END PARALLEL
+WRITE (*,*) 'Hello from serial process: ', OMP_GET_THREAD_NUM()
 
 !Initialization
 value=10
@@ -141,25 +142,20 @@ CLOSE (unit=14)
 
 !Read FCC lattice configuration data from 'conf.in'
 OPEN(unit=15,file='conf.in',status='old')
-
 DO i=1,13
  READ (15,*) qx(i),qy(i),qz(i),px(i),py(i),pz(i),pp(i)
 END DO
-
 DO i=1,13
  READ (15,*) (con(i,j),j=1,13)
 END DO
-
 DO i=1,12
  READ (15,*) (bn(i,j),j=1,12)
 END DO
-
 DO i=1,12
  DO j=1,13
   READ (15,*) (cr(i,j,k),k=1,13)
  END DO
 END DO
-
 DO i=1,12
  READ (15,*) (cn(i,j),j=1,12)
 END DO
@@ -225,22 +221,26 @@ ALLOCATE (ppy(nx),pmy(nx),pxz(nx))
 
 PRINT *, 'Assigning biasing value. pmax=', pmax
 !Assign the initial biasing to generate the bipolar parabolic flow
+!$OMP PARALLEL
+!$OMP DO
 DO x=1,nx
  xdiv=dble(x-1)/dble(nx-1)
  ppy(x)=pzero-pmax*(xdiv-xdiv*xdiv)
  pmy(x)=pzero+pmax*(xdiv-xdiv*xdiv)
  pxz(x)=pzero
 END DO
-
+!$OMP END DO
 PRINT *, 'Bipolar Velocity Profile Assigned'
 
 !Assign the initial xd,yd,and zd array value
+!$OMP DO
 DO i=1,nkt
  xd(i)=xx(i)
  yd(i)=yy(i)
  zd(i)=zz(i)
 END DO
-
+!$OMP END DO
+!$OMP END PARALLEL
 !Call subroutines for initialization
 CALL chaincalcs(dir_name)
 CALL boxcalcs(dir_name)
