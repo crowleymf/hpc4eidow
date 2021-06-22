@@ -840,7 +840,7 @@ contains
   ! write_final_model
   !==========================================================================
   subroutine write_final_model
-    character(len=10) :: fmtu21="(1024(I8,x))"
+    character(len=10) :: fmtu21="(1024(I8))"
 
     !Output the final model
     OPEN(unit=21, file=outfile, status='unknown')
@@ -875,7 +875,7 @@ contains
   ! write_updated_model
   !==========================================================================
   subroutine write_updated_model
-    character(len=40) :: fmt100='(1024(i8,x))'
+    character(len=40) :: fmt100="(1024(I8))"
     PRINT *,'Writing model file to disk after every maxsta loops'
     PRINT *,'Total loops of:',l,'MC time:',t
     OPEN(unit=21, file=outfile, status='unknown')
