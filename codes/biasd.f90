@@ -1,12 +1,14 @@
 !This subroutine is used to make the random direction moves in this Monte Carlo Scheme.
 SUBROUTINE biasd(x,d,dir_name)
 
+use pmtypes
 USE param
+use pm_subs,only:ran2
 
 IMPLICIT NONE
 character(len=*) :: dir_name
 INTEGER :: x,d
-REAL :: ran2
+!---REAL :: ran2
 DOUBLE PRECISION :: dtest
 Double PRECISION :: pxzx,ppyx,pmyx
 
