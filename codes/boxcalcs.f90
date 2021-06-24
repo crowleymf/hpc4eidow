@@ -21,7 +21,7 @@ real(kind=pm_dbl) :: sxxtot,syytot,szztot
 real(kind=pm_dbl) :: sxybox,sxzbox,syzbox
 real(kind=pm_dbl) :: sxxbox,syybox,szzbox
 real(kind=pm_dbl) :: sxybin,sxzbin,syzbin
-real(kind=pm_dbl) :: sxxbin,syybin,szzbin      
+real(kind=pm_dbl) :: sxxbin,syybin,szzbin
 
 real(kind=pm_dbl) :: sxytemp,sxztemp,syztemp
 real(kind=pm_dbl) :: sxxtemp,syytemp,szztemp
@@ -141,9 +141,9 @@ DO x = 1, nx
     dy = py(atemp)
     dz = pz(atemp)
 
-    thetax = dble(dx)/rdsqrt
-    thetay = dble(dy)/rdsqrt
-    thetaz = dble(dz)/rdsqrt
+    thetax = real(dx, kind=pm_dbl)/rdsqrt
+    thetay = real(dy, kind=pm_dbl)/rdsqrt
+    thetaz = real(dz, kind=pm_dbl)/rdsqrt
 
     sxybin = sxybin + thetax*thetay
     sxzbin = sxzbin + thetax*thetaz
@@ -186,9 +186,9 @@ DO x = 1, nx
     dy = py(atemp)
     dz = pz(atemp)
 
-    thetax = dble(dx)/rdsqrt
-    thetay = dble(dy)/rdsqrt
-    thetaz = dble(dz)/rdsqrt
+    thetax = real(dx, kind=pm_dbl)/rdsqrt
+    thetay = real(dy, kind=pm_dbl)/rdsqrt
+    thetaz = real(dz, kind=pm_dbl)/rdsqrt
 
     sxybin = sxybin + thetax*thetay
     sxzbin = sxzbin + thetax*thetaz
@@ -204,7 +204,7 @@ DO x = 1, nx
   END IF
  END DO
 
- denom = dble(count)
+ denom = real(count, kind=pm_dbl)
 
  sxy(x) = sxybin/denom
  sxz(x) = sxzbin/denom
@@ -220,25 +220,25 @@ DO x = 1, nx
  syytot = syytot + syy(x)
  szztot = szztot + szz(x)
 
- denom = 0.5D0*dble(ny*nz)
+ denom = 0.5D0*real(ny*nz, kind=pm_dbl)
 !Lattice density
- density1(x) = dble(binnw1(x))/denom
- density2(x) = dble(binnw2(x))/denom
- density3(x) = dble(binnw3(x))/denom
- density4(x) = dble(binnw4(x))/denom
- density5(x) = dble(binnw5(x))/denom
- density6(x) = dble(binnw6(x))/denom
- density7(x) = dble(binnw7(x))/denom
- density8(x) = dble(binnw8(x))/denom
+ density1(x) = real(binnw1(x), kind=pm_dbl)/denom
+ density2(x) = real(binnw2(x), kind=pm_dbl)/denom
+ density3(x) = real(binnw3(x), kind=pm_dbl)/denom
+ density4(x) = real(binnw4(x), kind=pm_dbl)/denom
+ density5(x) = real(binnw5(x), kind=pm_dbl)/denom
+ density6(x) = real(binnw6(x), kind=pm_dbl)/denom
+ density7(x) = real(binnw7(x), kind=pm_dbl)/denom
+ density8(x) = real(binnw8(x), kind=pm_dbl)/denom
 !Segmental density
- segdensity1(x) = dble(binnw1(x))
- segdensity2(x) = dble(binnw2(x))
- segdensity3(x) = dble(binnw3(x))
- segdensity4(x) = dble(binnw4(x))
- segdensity5(x) = dble(binnw5(x))
- segdensity6(x) = dble(binnw6(x))
- segdensity7(x) = dble(binnw7(x))
- segdensity8(x) = dble(binnw8(x))
+ segdensity1(x) = real(binnw1(x), kind=pm_dbl)
+ segdensity2(x) = real(binnw2(x), kind=pm_dbl)
+ segdensity3(x) = real(binnw3(x), kind=pm_dbl)
+ segdensity4(x) = real(binnw4(x), kind=pm_dbl)
+ segdensity5(x) = real(binnw5(x), kind=pm_dbl)
+ segdensity6(x) = real(binnw6(x), kind=pm_dbl)
+ segdensity7(x) = real(binnw7(x), kind=pm_dbl)
+ segdensity8(x) = real(binnw8(x), kind=pm_dbl)
 
  WRITE(52) x, sxy(x),sxz(x),syz(x),sxx(x),syy(x),szz(x)
  WRITE(53) x, density1(x),density2(x),density3(x),density4(x),density5(x),density6(x),density7(x),density8(x)
@@ -247,7 +247,7 @@ DO x = 1, nx
 
 ENDDO
 
-denom = dble(nx)
+denom = real(nx, kind=pm_dbl)
 
 sxybox = sxytot/denom
 sxzbox = sxztot/denom
@@ -348,7 +348,7 @@ IF (mod(l,maxsta) == 0 .AND. l /= 0) THEN
   ENDDO
  ENDDO
 
- denom = dble(maxsta)
+ denom = real(maxsta, kind=pm_dbl)
 
  sxyfinal = sxysumtemp/denom
  sxzfinal = sxzsumtemp/denom
