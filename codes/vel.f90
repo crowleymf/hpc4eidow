@@ -13,7 +13,6 @@ IF (t==0) THEN
   call initalize
   lold  = 0
 END IF
-
 !If maxsta loops have been reached
 IF ((mod(l,maxsta)==0).AND.(l/=lold)) THEN
   call update_velocity
@@ -23,6 +22,7 @@ IF ((mod(l,maxsta)==0).AND.(l/=lold)) THEN
 END IF
 
 call make_mc_move
+
 contains
   subroutine initalize
     OPEN(unit=60,file=dir_name//'velocity_y.dat',status='unknown')
