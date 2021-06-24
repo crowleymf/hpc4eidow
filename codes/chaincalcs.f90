@@ -265,42 +265,7 @@ IF (mod(l, maxsta) == 0 .AND. l /= 0) THEN
  REWIND (35)
 
  DO loop = 1, maxsta
-  READ(31) eteboxtemp, eteparaboxtemp, eteperpboxtemp, rogboxtemp, thetaxboxtemp, thetayboxtemp, thetazboxtemp
-  eteboxsum = eteboxsum + eteboxtemp
-  eteparaboxsum = eteparaboxsum + eteparaboxtemp
-  eteperpboxsum = eteperpboxsum + eteperpboxtemp
-
-  rogboxsum = rogboxsum + rogboxtemp
-
-  thetaxsum = thetaxsum + thetaxboxtemp
-  thetaysum = thetaysum + thetayboxtemp
-  thetazsum = thetazsum + thetazboxtemp
-
-  DO x = 1, nx
-   READ(33) point, etebintemp, eteparabintemp, eteperpbintemp, rogbintemp, chainbintemp
-   etebinsum(point) = etebinsum(point) + etebintemp
-   eteparabinsum(point) = eteparabinsum(point) + eteparabintemp
-   eteperpbinsum(point) = eteperpbinsum(point) + eteperpbintemp
-
-   rogbinsum(point) = rogbinsum(point) + rogbintemp
-
-   chainsum(point) = chainsum(point) + chainbintemp
-
-   READ(34) point, nk1temp, nk2temp, nk3temp, nk4temp, nk5temp, nk6temp, nk7temp, nk8temp
-   nk1sum(point) = nk1sum(point) + nk1temp
-   nk2sum(point) = nk2sum(point) + nk2temp
-   nk3sum(point) = nk3sum(point) + nk3temp
-   nk4sum(point) = nk4sum(point) + nk4temp
-   nk5sum(point) = nk5sum(point) + nk5temp
-   nk6sum(point) = nk6sum(point) + nk6temp
-   nk7sum(point) = nk7sum(point) + nk7temp
-   nk8sum(point) = nk8sum(point) + nk8temp
-
-   READ(35) point, thetaxbintemp, thetaybintemp, thetazbintemp
-   thetaxbinsum(point) = thetaxbinsum(point) + thetaxbintemp
-   thetaybinsum(point) = thetaybinsum(point) + thetaybintemp
-   thetazbinsum(point) = thetazbinsum(point) + thetazbintemp
-  ENDDO
+  call maxsta_avg_calc
  ENDDO
 
  denom = real(maxsta,kind=pm_dbl)
@@ -787,7 +752,44 @@ contains
     DEALLOCATE (thetaxbin, thetaybin, thetazbin)
   end subroutine cleanup
 
+  subroutine maxsta_avg_calc
+    READ(31) eteboxtemp, eteparaboxtemp, eteperpboxtemp, rogboxtemp, thetaxboxtemp, thetayboxtemp, thetazboxtemp
+    eteboxsum = eteboxsum + eteboxtemp
+    eteparaboxsum = eteparaboxsum + eteparaboxtemp
+    eteperpboxsum = eteperpboxsum + eteperpboxtemp
 
+    rogboxsum = rogboxsum + rogboxtemp
+
+    thetaxsum = thetaxsum + thetaxboxtemp
+    thetaysum = thetaysum + thetayboxtemp
+    thetazsum = thetazsum + thetazboxtemp
+
+    DO x = 1, nx
+     READ(33) point, etebintemp, eteparabintemp, eteperpbintemp, rogbintemp, chainbintemp
+     etebinsum(point) = etebinsum(point) + etebintemp
+     eteparabinsum(point) = eteparabinsum(point) + eteparabintemp
+     eteperpbinsum(point) = eteperpbinsum(point) + eteperpbintemp
+
+     rogbinsum(point) = rogbinsum(point) + rogbintemp
+
+     chainsum(point) = chainsum(point) + chainbintemp
+
+     READ(34) point, nk1temp, nk2temp, nk3temp, nk4temp, nk5temp, nk6temp, nk7temp, nk8temp
+     nk1sum(point) = nk1sum(point) + nk1temp
+     nk2sum(point) = nk2sum(point) + nk2temp
+     nk3sum(point) = nk3sum(point) + nk3temp
+     nk4sum(point) = nk4sum(point) + nk4temp
+     nk5sum(point) = nk5sum(point) + nk5temp
+     nk6sum(point) = nk6sum(point) + nk6temp
+     nk7sum(point) = nk7sum(point) + nk7temp
+     nk8sum(point) = nk8sum(point) + nk8temp
+
+     READ(35) point, thetaxbintemp, thetaybintemp, thetazbintemp
+     thetaxbinsum(point) = thetaxbinsum(point) + thetaxbintemp
+     thetaybinsum(point) = thetaybinsum(point) + thetaybintemp
+     thetazbinsum(point) = thetazbinsum(point) + thetazbintemp
+   end do
+   end subroutine maxsta_avg_calc
 
 
 END SUBROUTINE chaincalcs
