@@ -145,83 +145,27 @@ call initalize
 
 DO k = 1, nkt
  call iteration_init
-
- DO WHILE (atemp /= 13)
-  dx = dx + px(atemp)
-  dy = dy + py(atemp)
-  dz = dz + pz(atemp)
-
-  dxmv = dxmv + dx
-  dymv = dymv + dy
-  dzmv = dzmv + dz
-
-  xnew = xnp(atemp, x)
-  ynew = ynp(atemp, y)
-  znew = znp(atemp, z)
-
-  x = xnew
-  y = ynew
-  z = znew
-
-  atemp = a(x,y,z)
-
-  IF (atemp == 13) THEN
-   chainend(x) = chainend(x) + 1
-  ENDIF
- ENDDO
-call calc_single_bead_data
+ call calc_single_bead_data
 
 
 !Calculate the maximum ete
 IF(k==1) THEN
  maxete=ete(1)
 END IF
+
 IF (ete(k)>maxete) THEN
  maxete=ete(k)
 END IF
 
 ENDDO
-!Calcualte the box averages
-denom = real(nkt,kind=pm_dbl)
-
-etebox = eteboxtot/denom
-eteparabox = eteparatot/denom
-eteperpbox = eteperptot/denom
-
-rogbox = rogtot/denom
-
-thetaxbox = thetaxtot/denom
-thetaybox = thetaytot/denom
-thetazbox = thetaztot/denom
+call calc_box_avg
 !File unit 30 is the maxdyn loop and 31 is maxsta
 WRITE(30) etebox, rogbox
 WRITE(31) etebox, eteparabox, eteperpbox, rogbox, thetaxbox, thetaybox, thetazbox
 !Calculate the binned averages
 DO x = 1, nx
  denom = real(bincount(x))
- IF (bincount(x) == 0) THEN
-   call zero_bincount_init
-
- ELSE
-  etebin(x) = etebintot(x)/denom
-  eteparabin(x) = eteparabintot(x)/denom
-  eteperpbin(x) = eteperpbintot(x)/denom
-
-  rogbin(x) = rogbintot(x)/denom
-
-  thetaxbin(x) = thetaxbintot(x)/denom
-  thetaybin(x) = thetaybintot(x)/denom
-  thetazbin(x) = thetazbintot(x)/denom
-
-  nk1avg(x) =  real(binnk1(x),kind=pm_dbl)
-  nk2avg(x) =  real(binnk2(x),kind=pm_dbl)
-  nk3avg(x) =  real(binnk3(x),kind=pm_dbl)
-  nk4avg(x) =  real(binnk4(x),kind=pm_dbl)
-  nk5avg(x) =  real(binnk5(x),kind=pm_dbl)
-  nk6avg(x) =  real(binnk6(x),kind=pm_dbl)
-  nk7avg(x) =  real(binnk7(x),kind=pm_dbl)
-  nk8avg(x) =  real(binnk8(x),kind=pm_dbl)
- ENDIF
+ call bin_avg
 
 !Dynamic (calculations made every maxdyn loop) temp file
   WRITE(32) x, etebin(x), rogbin(x)
@@ -485,22 +429,7 @@ IF (mod(l, maxsta) == 0 .AND. l /= 0) THEN
 
 ENDIF
 
-!Array deallocation
-DEALLOCATE (dxcom, dycom, dzcom)
-
-DEALLOCATE (chainend, rog)
-
-DEALLOCATE (bin, bincount)
-DEALLOCATE (binnk1, binnk2, binnk3, binnk4, binnk5, binnk6, binnk7, binnk8)
-DEALLOCATE (nk1avg, nk2avg, nk3avg, nk4avg, nk5avg, nk6avg, nk7avg, nk8avg)
-
-DEALLOCATE (etepara, eteperp)
-DEALLOCATE (etebin, eteparabin, eteperpbin, rogbin)
-DEALLOCATE (etebintot, eteparabintot, eteperpbintot)
-
-DEALLOCATE (thetax, thetay, thetaz)
-DEALLOCATE (rogbintot, thetaxbintot, thetaybintot, thetazbintot)
-DEALLOCATE (thetaxbin, thetaybin, thetazbin)
+call cleanup
 
 300 FORMAT (3(A20,x))
 301 FORMAT (5(A20,x))
@@ -649,6 +578,29 @@ contains
     atemp = a(x,y,z)
 
     chainend(x) = chainend(x) + 1
+    DO WHILE (atemp /= 13)
+     dx = dx + px(atemp)
+     dy = dy + py(atemp)
+     dz = dz + pz(atemp)
+
+     dxmv = dxmv + dx
+     dymv = dymv + dy
+     dzmv = dzmv + dz
+
+     xnew = xnp(atemp, x)
+     ynew = ynp(atemp, y)
+     znew = znp(atemp, z)
+
+     x = xnew
+     y = ynew
+     z = znew
+
+     atemp = a(x,y,z)
+
+     IF (atemp == 13) THEN
+      chainend(x) = chainend(x) + 1
+     ENDIF
+    ENDDO
   end subroutine iteration_init
 
   subroutine zero_bead
@@ -774,6 +726,67 @@ contains
       thetazbintot(bin(k)) = thetazbintot(bin(k)) + (3.D0*thetaz(k)*thetaz(k) - 1.0D0)/2.D0
     ENDIF
   end subroutine calc_single_bead_data
+
+  subroutine calc_box_avg
+    !Calcualte the box averages
+    denom = real(nkt,kind=pm_dbl)
+
+    etebox = eteboxtot/denom
+    eteparabox = eteparatot/denom
+    eteperpbox = eteperptot/denom
+
+    rogbox = rogtot/denom
+
+    thetaxbox = thetaxtot/denom
+    thetaybox = thetaytot/denom
+    thetazbox = thetaztot/denom
+  end subroutine calc_box_avg
+
+  subroutine bin_avg
+    IF (bincount(x) == 0) THEN
+      call zero_bincount_init
+
+    ELSE
+     etebin(x) = etebintot(x)/denom
+     eteparabin(x) = eteparabintot(x)/denom
+     eteperpbin(x) = eteperpbintot(x)/denom
+
+     rogbin(x) = rogbintot(x)/denom
+
+     thetaxbin(x) = thetaxbintot(x)/denom
+     thetaybin(x) = thetaybintot(x)/denom
+     thetazbin(x) = thetazbintot(x)/denom
+
+     nk1avg(x) =  real(binnk1(x),kind=pm_dbl)
+     nk2avg(x) =  real(binnk2(x),kind=pm_dbl)
+     nk3avg(x) =  real(binnk3(x),kind=pm_dbl)
+     nk4avg(x) =  real(binnk4(x),kind=pm_dbl)
+     nk5avg(x) =  real(binnk5(x),kind=pm_dbl)
+     nk6avg(x) =  real(binnk6(x),kind=pm_dbl)
+     nk7avg(x) =  real(binnk7(x),kind=pm_dbl)
+     nk8avg(x) =  real(binnk8(x),kind=pm_dbl)
+    ENDIF
+  end subroutine bin_avg
+
+  subroutine cleanup
+    !Array deallocation
+    DEALLOCATE (dxcom, dycom, dzcom)
+
+    DEALLOCATE (chainend, rog)
+
+    DEALLOCATE (bin, bincount)
+    DEALLOCATE (binnk1, binnk2, binnk3, binnk4, binnk5, binnk6, binnk7, binnk8)
+    DEALLOCATE (nk1avg, nk2avg, nk3avg, nk4avg, nk5avg, nk6avg, nk7avg, nk8avg)
+
+    DEALLOCATE (etepara, eteperp)
+    DEALLOCATE (etebin, eteparabin, eteperpbin, rogbin)
+    DEALLOCATE (etebintot, eteparabintot, eteperpbintot)
+
+    DEALLOCATE (thetax, thetay, thetaz)
+    DEALLOCATE (rogbintot, thetaxbintot, thetaybintot, thetazbintot)
+    DEALLOCATE (thetaxbin, thetaybin, thetazbin)
+  end subroutine cleanup
+
 
 
 
