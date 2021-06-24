@@ -80,81 +80,16 @@ IF (t==0) THEN
  CLOSE(unit=58)
 ENDIF
 
-rdsqrt = sqrt(2.D0)
-
-boxcount = 0
-
-sxytot = 0.D0
-sxztot = 0.D0
-syztot = 0.D0
-sxxtot = 0.D0
-syytot = 0.D0
-szztot = 0.D0
+call init_setup
 
 DO x = 1, nx
- count = 0
-
- sxybin = 0.D0
- sxzbin = 0.D0
- syzbin = 0.D0
- sxxbin = 0.D0
- syybin = 0.D0
- szzbin = 0.D0
-
- binnw1(x) = 0
- binnw2(x) = 0
- binnw3(x) = 0
- binnw4(x) = 0
- binnw5(x) = 0
- binnw6(x) = 0
- binnw7(x) = 0
- binnw8(x) = 0
+ call init_nx_loop
 
  DO y = 1, ny
   IF (((mod(x,2)==1).AND. (mod(y,2)==1)).OR.((mod(x,2)==0).AND. (mod(y,2)==0))) THEN
    DO z = 1, nz, 2
-
-   k = ket(x,y,z)
-   atemp = a(x,y,z)
-   length = nw(k)
-!Density calculations
-   IF (length == nw1) THEN
-    binnw1(x) = binnw1(x) + 1
-   ELSEIF (length == nw2) THEN
-    binnw2(x) = binnw2(x) + 1
-   ELSEIF (length == nw3) THEN
-    binnw3(x) = binnw3(x) + 1
-   ELSEIF (length == nw4) THEN
-    binnw4(x) = binnw4(x) + 1
-   ELSEIF (length == nw5) THEN
-    binnw5(x) = binnw5(x) + 1
-   ELSEIF (length == nw6) THEN
-    binnw6(x) = binnw6(x) + 1
-   ELSEIF (length == nw7) THEN
-    binnw7(x) = binnw7(x) + 1
-   ELSEIF (length == nw8) THEN
-    binnw8(x) = binnw8(x) + 1
-   ENDIF
-!Stress Calculations
-   IF(atemp /= 13) THEN
-    dx = px(atemp)
-    dy = py(atemp)
-    dz = pz(atemp)
-
-    thetax = real(dx, kind=pm_dbl)/rdsqrt
-    thetay = real(dy, kind=pm_dbl)/rdsqrt
-    thetaz = real(dz, kind=pm_dbl)/rdsqrt
-
-    sxybin = sxybin + thetax*thetay
-    sxzbin = sxzbin + thetax*thetaz
-    syzbin = syzbin + thetay*thetaz
-    sxxbin = sxxbin + thetax*thetax
-    syybin = syybin + thetay*thetay
-    szzbin = szzbin + thetaz*thetaz
-
-    count = count + 1
-    boxcount = boxcount + 1
-    END IF
+     call calc_density
+     call calc_stress
    ENDDO
   ELSE
    DO z = 2, nz, 2
@@ -162,83 +97,17 @@ DO x = 1, nx
    k = ket(x,y,z)
    atemp = a(x,y,z)
    length = nw(k)
-!Density calculations
-   IF (length == nw1) THEN
-    binnw1(x) = binnw1(x) + 1
-   ELSEIF (length == nw2) THEN
-    binnw2(x) = binnw2(x) + 1
-   ELSEIF (length == nw3) THEN
-    binnw3(x) = binnw3(x) + 1
-   ELSEIF (length == nw4) THEN
-    binnw4(x) = binnw4(x) + 1
-   ELSEIF (length == nw5) THEN
-    binnw5(x) = binnw5(x) + 1
-   ELSEIF (length == nw6) THEN
-    binnw6(x) = binnw6(x) + 1
-   ELSEIF (length == nw7) THEN
-    binnw7(x) = binnw7(x) + 1
-   ELSEIF (length == nw8) THEN
-    binnw8(x) = binnw8(x) + 1
-   ENDIF
-!Stress Calculations
-   IF(atemp /= 13) THEN
-    dx = px(atemp)
-    dy = py(atemp)
-    dz = pz(atemp)
-
-    thetax = real(dx, kind=pm_dbl)/rdsqrt
-    thetay = real(dy, kind=pm_dbl)/rdsqrt
-    thetaz = real(dz, kind=pm_dbl)/rdsqrt
-
-    sxybin = sxybin + thetax*thetay
-    sxzbin = sxzbin + thetax*thetaz
-    syzbin = syzbin + thetay*thetaz
-    sxxbin = sxxbin + thetax*thetax
-    syybin = syybin + thetay*thetay
-    szzbin = szzbin + thetaz*thetaz
-
-    count = count + 1
-    boxcount = boxcount + 1
-   ENDIF
+   call density_shift
+   call stress_shift
    ENDDO
   END IF
  END DO
 
- denom = real(count, kind=pm_dbl)
+call normalize
 
- sxy(x) = sxybin/denom
- sxz(x) = sxzbin/denom
- syz(x) = syzbin/denom
- sxx(x) = sxxbin/denom
- syy(x) = syybin/denom
- szz(x) = szzbin/denom
+call lattice_density
+call segmental_density
 
- sxytot = sxytot + sxy(x)
- sxztot = sxztot + sxz(x)
- syztot = syztot + syz(x)
- sxxtot = sxxtot + sxx(x)
- syytot = syytot + syy(x)
- szztot = szztot + szz(x)
-
- denom = 0.5D0*real(ny*nz, kind=pm_dbl)
-!Lattice density
- density1(x) = real(binnw1(x), kind=pm_dbl)/denom
- density2(x) = real(binnw2(x), kind=pm_dbl)/denom
- density3(x) = real(binnw3(x), kind=pm_dbl)/denom
- density4(x) = real(binnw4(x), kind=pm_dbl)/denom
- density5(x) = real(binnw5(x), kind=pm_dbl)/denom
- density6(x) = real(binnw6(x), kind=pm_dbl)/denom
- density7(x) = real(binnw7(x), kind=pm_dbl)/denom
- density8(x) = real(binnw8(x), kind=pm_dbl)/denom
-!Segmental density
- segdensity1(x) = real(binnw1(x), kind=pm_dbl)
- segdensity2(x) = real(binnw2(x), kind=pm_dbl)
- segdensity3(x) = real(binnw3(x), kind=pm_dbl)
- segdensity4(x) = real(binnw4(x), kind=pm_dbl)
- segdensity5(x) = real(binnw5(x), kind=pm_dbl)
- segdensity6(x) = real(binnw6(x), kind=pm_dbl)
- segdensity7(x) = real(binnw7(x), kind=pm_dbl)
- segdensity8(x) = real(binnw8(x), kind=pm_dbl)
 
  WRITE(52) x, sxy(x),sxz(x),syz(x),sxx(x),syy(x),szz(x)
  WRITE(53) x, density1(x),density2(x),density3(x),density4(x),density5(x),density6(x),density7(x),density8(x)
@@ -271,39 +140,7 @@ IF (mod(l,maxsta) == 0 .AND. l /= 0) THEN
  REWIND(53)
  REWIND(54)
 
- sxysumtemp = 0.D0
- sxzsumtemp = 0.D0
- syzsumtemp = 0.D0
- sxxsumtemp = 0.D0
- syysumtemp = 0.D0
- szzsumtemp = 0.D0
-
- DO x = 1, nx
-  sxysumbintmp(x) = 0.D0
-  sxzsumbintmp(x) = 0.D0
-  syzsumbintmp(x) = 0.D0
-  sxxsumbintmp(x) = 0.D0
-  syysumbintmp(x) = 0.D0
-  szzsumbintmp(x) = 0.D0
-
-  density1sum(x) = 0.D0
-  density2sum(x) = 0.D0
-  density3sum(x) = 0.D0
-  density4sum(x) = 0.D0
-  density5sum(x) = 0.D0
-  density6sum(x) = 0.D0
-  density7sum(x) = 0.D0
-  density8sum(x) = 0.D0
-
-  segdensity1sum(x) = 0.D0
-  segdensity2sum(x) = 0.D0
-  segdensity3sum(x) = 0.D0
-  segdensity4sum(x) = 0.D0
-  segdensity5sum(x) = 0.D0
-  segdensity6sum(x) = 0.D0
-  segdensity7sum(x) = 0.D0
-  segdensity8sum(x) = 0.D0
- ENDDO
+call zero_out
 
  DO loop = 1, maxsta
 
@@ -430,4 +267,214 @@ DEALLOCATE (segdensity1,segdensity2,segdensity3,segdensity4,segdensity5,segdensi
 401 FORMAT (9(A20,x))
 402 FORMAT (I20,x,6(f20.14,x))
 403 FORMAT (I20,x,8(f20.14,x))
+
+
+contains
+
+  subroutine init_setup
+    rdsqrt = sqrt(2.D0)
+
+    boxcount = 0
+
+    sxytot = 0.D0
+    sxztot = 0.D0
+    syztot = 0.D0
+    sxxtot = 0.D0
+    syytot = 0.D0
+    szztot = 0.D0
+  end subroutine init_setup
+
+  subroutine init_nx_loop
+    count = 0
+
+    sxybin = 0.D0
+    sxzbin = 0.D0
+    syzbin = 0.D0
+    sxxbin = 0.D0
+    syybin = 0.D0
+    szzbin = 0.D0
+
+    binnw1(x) = 0
+    binnw2(x) = 0
+    binnw3(x) = 0
+    binnw4(x) = 0
+    binnw5(x) = 0
+    binnw6(x) = 0
+    binnw7(x) = 0
+    binnw8(x) = 0
+  end subroutine init_nx_loop
+
+  subroutine calc_density
+    k = ket(x,y,z)
+    atemp = a(x,y,z)
+    length = nw(k)
+ !Density calculations
+    IF (length == nw1) THEN
+     binnw1(x) = binnw1(x) + 1
+    ELSEIF (length == nw2) THEN
+     binnw2(x) = binnw2(x) + 1
+    ELSEIF (length == nw3) THEN
+     binnw3(x) = binnw3(x) + 1
+    ELSEIF (length == nw4) THEN
+     binnw4(x) = binnw4(x) + 1
+    ELSEIF (length == nw5) THEN
+     binnw5(x) = binnw5(x) + 1
+    ELSEIF (length == nw6) THEN
+     binnw6(x) = binnw6(x) + 1
+    ELSEIF (length == nw7) THEN
+     binnw7(x) = binnw7(x) + 1
+    ELSEIF (length == nw8) THEN
+     binnw8(x) = binnw8(x) + 1
+    ENDIF
+  end subroutine calc_density
+
+  subroutine calc_stress
+    !Stress Calculations
+       IF(atemp /= 13) THEN
+        dx = px(atemp)
+        dy = py(atemp)
+        dz = pz(atemp)
+
+        thetax = real(dx, kind=pm_dbl)/rdsqrt
+        thetay = real(dy, kind=pm_dbl)/rdsqrt
+        thetaz = real(dz, kind=pm_dbl)/rdsqrt
+
+        sxybin = sxybin + thetax*thetay
+        sxzbin = sxzbin + thetax*thetaz
+        syzbin = syzbin + thetay*thetaz
+        sxxbin = sxxbin + thetax*thetax
+        syybin = syybin + thetay*thetay
+        szzbin = szzbin + thetaz*thetaz
+
+        count = count + 1
+        boxcount = boxcount + 1
+        END IF
+  end subroutine calc_stress
+
+  subroutine density_shift
+    !Density calculations
+       IF (length == nw1) THEN
+        binnw1(x) = binnw1(x) + 1
+       ELSEIF (length == nw2) THEN
+        binnw2(x) = binnw2(x) + 1
+       ELSEIF (length == nw3) THEN
+        binnw3(x) = binnw3(x) + 1
+       ELSEIF (length == nw4) THEN
+        binnw4(x) = binnw4(x) + 1
+       ELSEIF (length == nw5) THEN
+        binnw5(x) = binnw5(x) + 1
+       ELSEIF (length == nw6) THEN
+        binnw6(x) = binnw6(x) + 1
+       ELSEIF (length == nw7) THEN
+        binnw7(x) = binnw7(x) + 1
+       ELSEIF (length == nw8) THEN
+        binnw8(x) = binnw8(x) + 1
+       ENDIF
+  end subroutine density_shift
+
+  subroutine stress_shift
+    !Stress Calculations
+       IF(atemp /= 13) THEN
+        dx = px(atemp)
+        dy = py(atemp)
+        dz = pz(atemp)
+
+        thetax = real(dx, kind=pm_dbl)/rdsqrt
+        thetay = real(dy, kind=pm_dbl)/rdsqrt
+        thetaz = real(dz, kind=pm_dbl)/rdsqrt
+
+        sxybin = sxybin + thetax*thetay
+        sxzbin = sxzbin + thetax*thetaz
+        syzbin = syzbin + thetay*thetaz
+        sxxbin = sxxbin + thetax*thetax
+        syybin = syybin + thetay*thetay
+        szzbin = szzbin + thetaz*thetaz
+
+        count = count + 1
+        boxcount = boxcount + 1
+       ENDIF
+  end subroutine stress_shift
+
+  subroutine normalize
+    denom = real(count, kind=pm_dbl)
+
+    sxy(x) = sxybin/denom
+    sxz(x) = sxzbin/denom
+    syz(x) = syzbin/denom
+    sxx(x) = sxxbin/denom
+    syy(x) = syybin/denom
+    szz(x) = szzbin/denom
+
+    sxytot = sxytot + sxy(x)
+    sxztot = sxztot + sxz(x)
+    syztot = syztot + syz(x)
+    sxxtot = sxxtot + sxx(x)
+    syytot = syytot + syy(x)
+    szztot = szztot + szz(x)
+
+    denom = 0.5D0*real(ny*nz, kind=pm_dbl)
+  end subroutine normalize
+
+  subroutine lattice_density
+
+    !Lattice density
+     density1(x) = real(binnw1(x), kind=pm_dbl)/denom
+     density2(x) = real(binnw2(x), kind=pm_dbl)/denom
+     density3(x) = real(binnw3(x), kind=pm_dbl)/denom
+     density4(x) = real(binnw4(x), kind=pm_dbl)/denom
+     density5(x) = real(binnw5(x), kind=pm_dbl)/denom
+     density6(x) = real(binnw6(x), kind=pm_dbl)/denom
+     density7(x) = real(binnw7(x), kind=pm_dbl)/denom
+     density8(x) = real(binnw8(x), kind=pm_dbl)/denom
+
+  end subroutine lattice_density
+
+  subroutine segmental_density
+    !Segmental density
+     segdensity1(x) = real(binnw1(x), kind=pm_dbl)
+     segdensity2(x) = real(binnw2(x), kind=pm_dbl)
+     segdensity3(x) = real(binnw3(x), kind=pm_dbl)
+     segdensity4(x) = real(binnw4(x), kind=pm_dbl)
+     segdensity5(x) = real(binnw5(x), kind=pm_dbl)
+     segdensity6(x) = real(binnw6(x), kind=pm_dbl)
+     segdensity7(x) = real(binnw7(x), kind=pm_dbl)
+     segdensity8(x) = real(binnw8(x), kind=pm_dbl)
+  end subroutine segmental_density
+
+subroutine zero_out
+  sxysumtemp = 0.D0
+  sxzsumtemp = 0.D0
+  syzsumtemp = 0.D0
+  sxxsumtemp = 0.D0
+  syysumtemp = 0.D0
+  szzsumtemp = 0.D0
+
+  DO x = 1, nx
+   sxysumbintmp(x) = 0.D0
+   sxzsumbintmp(x) = 0.D0
+   syzsumbintmp(x) = 0.D0
+   sxxsumbintmp(x) = 0.D0
+   syysumbintmp(x) = 0.D0
+   szzsumbintmp(x) = 0.D0
+
+   density1sum(x) = 0.D0
+   density2sum(x) = 0.D0
+   density3sum(x) = 0.D0
+   density4sum(x) = 0.D0
+   density5sum(x) = 0.D0
+   density6sum(x) = 0.D0
+   density7sum(x) = 0.D0
+   density8sum(x) = 0.D0
+
+   segdensity1sum(x) = 0.D0
+   segdensity2sum(x) = 0.D0
+   segdensity3sum(x) = 0.D0
+   segdensity4sum(x) = 0.D0
+   segdensity5sum(x) = 0.D0
+   segdensity6sum(x) = 0.D0
+   segdensity7sum(x) = 0.D0
+   segdensity8sum(x) = 0.D0
+  ENDDO
+end subroutine zero_out
+
 END SUBROUTINE boxcalcs

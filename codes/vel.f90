@@ -55,7 +55,7 @@ contains
           sumvy(x)=sumvy(x)+vy(x,y,z)
         END DO
       END DO
-      avgvy(x)=sumvy(x)/dble((ny*nz/2))
+      avgvy(x)=sumvy(x)/real((ny*nz/2), kind=pm_dbl)
     END DO
   end subroutine update_velocity
 
@@ -71,17 +71,16 @@ contains
           sumvx(y)=sumvx(y)+vx(x,y,z)
         END DO
       END DO
-      avgvx(y)=sumvx(y)/dble((nx*nz/2))
+      avgvx(y)=sumvx(y)/real((nx*nz/2), kind=pm_dbl)
     END DO
   end subroutine calc_avg_vel
 
   subroutine write_velocity_output
     !Write out velocity values to data file
-    character(len=40) :: fmt100="(1024(I8))"
     OPEN(unit=60,file=dir_name//'velocity_y.dat',status='old',position='append')
-      WRITE(60,fmt100)'l=',l
+      WRITE(60,*)'l=',l
       DO x=1,nx
-        WRITE(60,fmt100) x, avgvy(x)
+        WRITE(60,*) x, avgvy(x)
       END DO
     CLOSE(unit=60)
 
