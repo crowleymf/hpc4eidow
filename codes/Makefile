@@ -17,8 +17,8 @@ PolyMix.o: param.mod correlation.mod $(MOD_FILES) PolyMix.f90
 autocorrelate.o: autocorrelate.f90 param.mod
 	$(F90) -fopenmp -Ofast -c autocorrelate.f90
 
-chaindynamics.o: chaindynamics.f90
-	$(F90) -fopenmp -Ofast -c $^
+chaindynamics.o: chaindynamics.f90 correlation.mod 
+	$(F90) -fopenmp -Ofast -c $<
 
 biasd.o: biasd.f90 pm_subs.o
 	$(F90) -fopenmp -Ofast -c biasd.f90
