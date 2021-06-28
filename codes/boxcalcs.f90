@@ -55,30 +55,7 @@ ALLOCATE (density1(nx),density2(nx),density3(nx),density4(nx),density5(nx),densi
 ALLOCATE (segdensity1(nx),segdensity2(nx),segdensity3(nx),segdensity4(nx),segdensity5(nx), &
           segdensity6(nx),segdensity7(nx),segdensity8(nx))
 
-IF (t==0) THEN
-
- OPEN(unit=51, file=dir_name//'tmpstressbox.tmp', form='unformatted')
- OPEN(unit=52, file=dir_name//'tmpstressbin.tmp', form='unformatted')
- OPEN(unit=53, file=dir_name//'tmpdensity.tmp', form='unformatted')
- OPEN(unit=54, file=dir_name//'tmpsegdensity.tmp',form='unformatted')
-
- OPEN(unit=55, file=dir_name//'stressbox.dat', form='formatted')
- WRITE(55,400) 'l', 'sxy', 'sxz', 'syz', 'sxx', 'syy', 'szz'
- CLOSE(unit=55)
-
- OPEN(unit=56, file=dir_name//'stressbin.dat', form='formatted')
- WRITE(56,400) 'x', 'sxy', 'sxz', 'syz', 'sxx', 'syy', 'szz'
- CLOSE(unit=56)
-
- OPEN(unit=57, file=dir_name//'latticedensity.dat', form='formatted')
- WRITE(57,401) 'x', 'density1', 'density2', 'density3', 'density4', 'density5', 'density6', 'density7', 'density8'
- CLOSE(unit=57)
-
- OPEN(unit=58, file=dir_name//'segmentdensity.dat', form='formatted')
- WRITE(58,401) 'x', 'segdensity2', 'segdensity2', 'segdensity3', &
-                    'segdensity4', 'segdensity5', 'segdensity6', 'segdensity7', 'segdensity8'
- CLOSE(unit=58)
-ENDIF
+call write_col_header
 
 call init_setup
 
@@ -107,13 +84,7 @@ call normalize
 
 call lattice_density
 call segmental_density
-
-
- WRITE(52) x, sxy(x),sxz(x),syz(x),sxx(x),syy(x),szz(x)
- WRITE(53) x, density1(x),density2(x),density3(x),density4(x),density5(x),density6(x),density7(x),density8(x)
- WRITE(54) x, segdensity1(x),segdensity2(x),segdensity3(x),segdensity4(x),segdensity5(x), &
-              segdensity6(x),segdensity7(x),segdensity8(x)
-
+call write_density_data
 ENDDO
 
 denom = real(nx, kind=pm_dbl)
@@ -256,6 +227,7 @@ call zero_out
  DEALLOCATE (density1sum,density2sum,density3sum,density4sum,density5sum,density6sum,density7sum,density8sum)
  DEALLOCATE (segdensity1sum,segdensity2sum,segdensity3sum,segdensity4sum, &
                segdensity5sum,segdensity6sum,segdensity7sum,segdensity8sum)
+
 END IF
 
 DEALLOCATE (sxy,sxz,syz,sxx,syy,szz)
@@ -268,9 +240,44 @@ DEALLOCATE (segdensity1,segdensity2,segdensity3,segdensity4,segdensity5,segdensi
 402 FORMAT (I20,x,6(f20.14,x))
 403 FORMAT (I20,x,8(f20.14,x))
 
-
 contains
+  subroutine write_density_data
+    WRITE(52) x, sxy(x),sxz(x),syz(x),sxx(x),syy(x),szz(x)
+    WRITE(53) x, density1(x),density2(x),density3(x),density4(x),density5(x),density6(x),density7(x),density8(x)
+    WRITE(54) x, segdensity1(x),segdensity2(x),segdensity3(x),segdensity4(x),segdensity5(x), &
+                 segdensity6(x),segdensity7(x),segdensity8(x)
+  end subroutine write_density_data
 
+  subroutine write_col_header
+    400 FORMAT (7(A20,x))
+    401 FORMAT (9(A20,x))
+    402 FORMAT (I20,x,6(f20.14,x))
+    403 FORMAT (I20,x,8(f20.14,x))
+
+    IF (t==0) THEN
+     OPEN(unit=51, file=dir_name//'tmpstressbox.tmp', form='unformatted')
+     OPEN(unit=52, file=dir_name//'tmpstressbin.tmp', form='unformatted')
+     OPEN(unit=53, file=dir_name//'tmpdensity.tmp', form='unformatted')
+     OPEN(unit=54, file=dir_name//'tmpsegdensity.tmp',form='unformatted')
+
+     OPEN(unit=55, file=dir_name//'stressbox.dat', form='formatted')
+     WRITE(55,400) 'l', 'sxy', 'sxz', 'syz', 'sxx', 'syy', 'szz'
+     CLOSE(unit=55)
+
+     OPEN(unit=56, file=dir_name//'stressbin.dat', form='formatted')
+     WRITE(56,400) 'x', 'sxy', 'sxz', 'syz', 'sxx', 'syy', 'szz'
+     CLOSE(unit=56)
+
+     OPEN(unit=57, file=dir_name//'latticedensity.dat', form='formatted')
+     WRITE(57,401) 'x', 'density1', 'density2', 'density3', 'density4', 'density5', 'density6', 'density7', 'density8'
+     CLOSE(unit=57)
+
+     OPEN(unit=58, file=dir_name//'segmentdensity.dat', form='formatted')
+     WRITE(58,401) 'x', 'segdensity2', 'segdensity2', 'segdensity3', &
+                        'segdensity4', 'segdensity5', 'segdensity6', 'segdensity7', 'segdensity8'
+     CLOSE(unit=58)
+    ENDIF
+  end subroutine write_col_header
   subroutine init_setup
     rdsqrt = sqrt(2.D0)
 
