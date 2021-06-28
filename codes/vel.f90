@@ -6,7 +6,7 @@ use pmtypes
 IMPLICIT NONE
 character(len=*) :: dir_name
 INTEGER :: x,y,z,xn,yn,zn
-INTEGER :: d
+INTEGER :: d,dmask
 
 !Initialization
 IF (t==0) THEN
@@ -25,6 +25,7 @@ call make_mc_move
 
 contains
   subroutine initalize
+    dmask = 2**(d-1)
     OPEN(unit=60,file=dir_name//'velocity_y.dat',status='unknown')
     CLOSE(unit=60)
 
@@ -94,6 +95,9 @@ contains
 
   subroutine make_mc_move
     !TV moves in the -y direction => bead moves in +y direction
+    ! 2**(5-1)=16 + 2**(7-1)=64 + 2**(9-1)=256 + 2**(12-1)= 2048 == 2384 
+    IF ( (dmask .and. 2384) /=0 ) PRINT(*,*) d, dmask
+    !dispy(xn,yn,zn) = dispy(xn,yn,zn) + 1
     IF ((d==5) .OR. (d==7) .OR. (d==9) .OR. (d==12)) dispy(xn,yn,zn) = dispy(xn,yn,zn) + 1
 
     !TV moves in the +y direction => bead moves in -y direction
