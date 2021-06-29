@@ -25,7 +25,7 @@ call make_mc_move
 
 contains
   subroutine initalize
-    dmask = 2**(d-1)
+    dmask = ishft(1,d-1)
     OPEN(unit=60,file=dir_name//'velocity_y.dat',status='unknown')
     CLOSE(unit=60)
 
@@ -94,11 +94,21 @@ contains
   end subroutine write_velocity_output
 
   subroutine make_mc_move
+    integer:: dummy 
     !TV moves in the -y direction => bead moves in +y direction
     ! 2**(5-1)=16 + 2**(7-1)=64 + 2**(9-1)=256 + 2**(12-1)= 2048 == 2384 
-    IF ( (dmask .and. 2384) /=0 ) PRINT(*,*) d, dmask
+    !IF ( IAND(dmask,  2384) /=0 ) then
+    !
+    !PRINT *, "d: ", d, "dmask: ", dmask
+    !  dummy = ishft(iand(dmask,2384),d-1) + dispy(xn,yn,zn)
+    !  print *, "found a match", dummy, "<-- dummy dmask--> ", dmask, " d: ", d
+    !  stop
+    !end if 
+    !print *, "----out if: d: ", d, "dmask: ", dmask
     !dispy(xn,yn,zn) = dispy(xn,yn,zn) + 1
     IF ((d==5) .OR. (d==7) .OR. (d==9) .OR. (d==12)) dispy(xn,yn,zn) = dispy(xn,yn,zn) + 1
+    !dispy(xn,yn,zn) = ishft(iand(dmask,2384), 1-d) + dispy(xn,yn,zn)
+    !print *, dummy, "<-- dummy dmask--> ", dmask, " d: ", d
 
     !TV moves in the +y direction => bead moves in -y direction
     IF ((d==6) .OR. (d==8) .OR. (d==10) .OR. (d==11)) dispy(xn,yn,zn) = dispy(xn,yn,zn) - 1
@@ -108,6 +118,6 @@ contains
 
     !TV moves in the +x direction => bead moves in -x direction
     IF ((d==2) .OR. (d==4) .OR. (d==10) .OR. (d==12)) dispx(xn,yn,zn) = dispx(xn,yn,zn) - 1
-
+    
   end subroutine make_mc_move
 end subroutine vel
