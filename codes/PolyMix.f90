@@ -5,7 +5,7 @@ program polymix
 
   use pmtypes
   use param
-  use pm_subs, only: get_pm_save_dir, dir_name, ran2
+  use pm_subs, only: get_pm_save_dir, dir_name, ran2, biasd
 
   implicit none
 
@@ -895,7 +895,7 @@ contains
     END DO
 
     !Write bond code and chain number for every site
-    WRITE (21,fmt100) (((i,j,k,a(i,j,k),b(i,j,k),ket(i,j,k),k=-1,nz),j=1,ny),i=1,nx)
+    WRITE (21,fmt100) (((i,j,k,a(i,j,k),b(i,j,k),ket(i,j,k),k=1,nz),j=1,ny),i=1,nx)
 
     !Write the first monomer position of each chain and the corresponding chain length.
     DO i=1,nkt
