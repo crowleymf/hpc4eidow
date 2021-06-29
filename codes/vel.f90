@@ -2,96 +2,106 @@
 SUBROUTINE vel(xn,yn,zn,d, dir_name)
 
 USE param
-
+use pmtypes
 IMPLICIT NONE
 character(len=*) :: dir_name
 INTEGER :: x,y,z,xn,yn,zn
-INTEGER :: d
+INTEGER :: d,dmask
+!
+! print *,  "kind: ===> ", kind(dmask)
+! print *,  "3000: " , kind(3000)
+! dmask = 7
+! print , "#: ", kind(dmask)
+! stop
 
 !Initialization
-IF (t==0) THEN
- OPEN(unit=60,file=dir_name//'velocity_y.dat',status='unknown')
- CLOSE(unit=60)      
+if (t==0) THEN
+  call initalize
+  lold  = 0
+end if
+!if maxsta loops have been reached
+if ((mod(l,maxsta)==0).AND.(l/=lold)) THEN
+  call update_velocity
+  call calc_avg_vel
+  call write_velocity_output
+  lold=l
+end if
+if (d < 13) call make_mc_move
 
- OPEN(unit=61,file=dir_name//'velocity_x.dat',status='unknown')
- CLOSE(unit=61)
+contains
+  subroutine initalize
+    dmask = 0
+    open(unit=60,file=dir_name//'velocity_y.dat',status='unknown')
+    close(unit=60)
 
- DO x=1,nx
-  DO y=1,ny
-   DO z=1,nz
-    dispy(x,y,z)=0
-    dispx(x,y,z)=0
-    vy(x,y,z)=0.D0
-    vx(x,y,z)=0.D0
-   END DO
-  END DO
- END DO
- lold=0
-END IF
+    open(unit=61,file=dir_name//'velocity_x.dat',status='unknown')
+    close(unit=61)
 
-!If maxsta loops have been reached, write out the updated velocities
-IF ((mod(l,maxsta)==0).AND.(l/=lold)) THEN
- 
- DO x=1,nx
-  DO y=1,ny
-   DO z=1,nz
-    vy(x,y,z)=dble(dispy(x,y,z))/t
-    vx(x,y,z)=dble(dispx(x,y,z))/t
-   END DO
-  END DO
- END DO
- 
- DO x=1,nx
-  sumvy(x)=0.D0
-  avgvy(x)=0.D0
-  DO y=1,ny
-   DO z=1,nz
-    sumvy(x)=sumvy(x)+vy(x,y,z)
-   END DO
-  END DO
-!The average value for the velocity of a given yz-plane is the total velocity divided by 
-!the number of lattice sites in a plane (ny*nz/2).
-   avgvy(x)=sumvy(x)/dble((ny*nz/2))
- END DO
- 
- DO y=1,ny
-  sumvx(y)=0.D0
-  avgvx(y)=0.D0
-  DO x=1,nx
-   DO z=1,nz
-    sumvx(y)=sumvx(y)+vx(x,y,z)
-   END DO
-  END DO
-   avgvx(y)=sumvx(y)/dble((nx*nz/2))
- END DO
+    dispy = 0
+    dispx = 0
+    vy    = 0.D0
+    vx    = 0.D0
+  end subroutine initalize
 
-!Write out velocity values to data file
- OPEN(unit=60,file=dir_name//'velocity_y.dat',status='old',position='append')
-  WRITE(60,*)'l=',l
-  DO x=1,nx
-   WRITE(60,*)x,avgvy(x)
-  END DO
- CLOSE(unit=60) 
-  
- OPEN(unit=61,file=dir_name//'velocity_x.dat',status='old',position='append')
-  WRITE(61,*)'l=',l
-  DO y=1,ny
-   WRITE(61,*)y,avgvx(y)
-  END DO
- CLOSE(unit=61) 
- lold=l
-END IF
+  subroutine update_velocity
+    do x=1,nx
+      do y=1,ny
+        do z=1,nz
+          vy(x,y,z)=real(dispy(x,y,z),kind=pm_dbl)/t
+          vx(x,y,z)=real(dispx(x,y,z),kind=pm_dbl)/t
+        end do
+      end do
+    end do
 
-!TV moves in the -y direction => bead moves in +y direction
-IF ((d==5) .OR. (d==7) .OR. (d==9) .OR. (d==12)) dispy(xn,yn,zn) = dispy(xn,yn,zn) + 1
+    do x=1,nx
+      sumvy(x)=0.D0
+      avgvy(x)=0.D0
+      do y=1,ny
+        do z=1,nz
+          sumvy(x)=sumvy(x)+vy(x,y,z)
+        end do
+      end do
+      avgvy(x)=sumvy(x)/real((ny*nz/2), kind=pm_dbl)
+    end do
+  end subroutine update_velocity
 
-!TV moves in the +y direction => bead moves in -y direction
-IF ((d==6) .OR. (d==8) .OR. (d==10) .OR. (d==11)) dispy(xn,yn,zn) = dispy(xn,yn,zn) - 1
+  subroutine calc_avg_vel
+    !The average value for the velocity of a given yz-plane is the total velocity divided by
+    !the number of lattice sites in a plane (ny*nz/2).
+    do y=1,ny
+      sumvx(y)=0.D0
+      avgvx(y)=0.D0
+      do x=1,nx
+        do z=1,nz
+          sumvx(y)=sumvx(y)+vx(x,y,z)
+        end do
+      end do
+      avgvx(y)=sumvx(y)/real((nx*nz/2), kind=pm_dbl)
+    end do
+  end subroutine calc_avg_vel
 
-!TV moves in the -x direction => bead moves in +x direction
-IF ((d==1) .OR. (d==3) .OR. (d==9) .OR. (d==11)) dispx(xn,yn,zn) = dispx(xn,yn,zn) + 1
+  subroutine write_velocity_output
+    !write out velocity values to data file
+    open(unit=60,file=dir_name//'velocity_y.dat',status='old',position='append')
+      write(60,*)'l=',l
+      do x=1,nx
+        write(60,*) x, avgvy(x)
+      end do
+    close(unit=60)
 
-!TV moves in the +x direction => bead moves in -x direction
-IF ((d==2) .OR. (d==4) .OR. (d==10) .OR. (d==12)) dispx(xn,yn,zn) = dispx(xn,yn,zn) - 1
+    open(unit=61,file=dir_name//'velocity_x.dat',status='old',position='append')
+      write(61,*)'l=',l
+      do y=1,ny
+        write(61,*)y,avgvx(y)
+      end do
+    close(unit=61)
+  end subroutine write_velocity_output
 
-END SUBROUTINE vel
+  subroutine make_mc_move
+    dmask = ishft(1,d-1)
+
+    dispy(xn,yn,zn) = dispy(xn,yn,zn) + ishft(iand(dmask,2384), 1-d) - ishft(iand(dmask,1696), 1-d)
+    dispx(xn,yn,zn) = dispx(xn,yn,zn) + ishft(iand(dmask,1285), 1-d) - ishft(iand(dmask,2570), 1-d)
+  end subroutine make_mc_move
+
+end subroutine vel
