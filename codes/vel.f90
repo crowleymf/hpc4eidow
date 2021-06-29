@@ -25,7 +25,7 @@ call make_mc_move
 
 contains
   subroutine initalize
-    dmask = ishft(1,d-1)
+    dmask = 0
     open(unit=60,file=dir_name//'velocity_y.dat',status='unknown')
     close(unit=60)
 
@@ -63,7 +63,6 @@ contains
   subroutine calc_avg_vel
     !The average value for the velocity of a given yz-plane is the total velocity divided by
     !the number of lattice sites in a plane (ny*nz/2).
-
     do y=1,ny
       sumvx(y)=0.D0
       avgvx(y)=0.D0
@@ -94,51 +93,49 @@ contains
   end subroutine write_velocity_output
 
   subroutine make_mc_move
-    integer:: dummy
+    dmask = ishft(1,d-1)
+    !TV moves in the -y direction => bead moves in +y direction
 
     if ( IAND(dmask,  2384) /=0 ) then
-      print *, "d is 8 7 9 12"
-      print *, "d: ", d, "dmask: ", dmask, "value:", ishft(iand(dmask,2384), 1-d)
-      stop
+       print *, "d is 5 7 9 12"
+       print *, "d: ", d, "dmask: ", dmask, "shift:", ishft(iand(dmask,2384), 1-d)
     end if
 
-    if ( IAND(dmask,  1986) /=0 ) then
-      print *, "d is 6 8 10 11"
-      print *, "d: ", d, "dmask: ", dmask, "value:", ishft(iand(dmask,1986), 1-d)
-      stop
+    if ( IAND(dmask,  1696) /=0 ) then
+       print *, "d is 6 8 10 11"
+       print *, "d: ", d, "dmask: ", dmask, "shift:", ishft(iand(dmask,1696), 1-d)
     end if
 
     if ( IAND(dmask,  1285) /=0 ) then
-      print *, "d is 1 3 9 11"
-      print *, "d: ", d, "dmask: ", dmask, "value:", ishft(iand(dmask,1285), 1-d)
-      stop
+       print *, "d is 1 3 9 11"
+       print *, "d: ", d, "dmask: ", dmask, "shift:", ishft(iand(dmask,1285), 1-d)
     end if
 
-    if ( IAND(dmask, 2570) /=0 ) then
-      print *, "d is 2 4 10 12"
-      print *, "d: ", d, "dmask: ", dmask, "value:", ishft(iand(dmask,2570), 1-d)
-      stop
+    if ( IAND(dmask,  2570) /=0 ) then
+       print *, "d is 2 4 10 12"
+       print *, "d: ", d, "dmask: ", dmask, "shift:", ishft(iand(dmask,2570), 1-d)
     end if
-    ! TV moves in the -y direction => bead moves in +y direction
-    ! 2**(5-1) + 2**(7-1) + 2**(9-1) + 2**(12-1) == 2384
-    ! if ((d==5) .OR. (d==7) .OR. (d==9) .OR. (d==12)) dispy(xn,yn,zn) = dispy(xn,yn,zn) + 1
+
+    print *, ""
+
+    !IF ((d==5) .OR. (d==7) .OR. (d==9) .OR. (d==12)) dispy(xn,yn,zn) = dispy(xn,yn,zn) + 1
+    !2**(5-1) + 2**(7-1) + 2**(9-1) + 2**(12-1) == 2384
     dispy(xn,yn,zn) = dispy(xn,yn,zn) + ishft(iand(dmask,2384), 1-d)
 
-    ! TV moves in the +y direction => bead moves in -y direction
-    ! 2**(6-1) + 2**(8-1) + 2**(10-1) + 2**(11-1) == 1696
-    ! if ((d==6) .OR. (d==8) .OR. (d==10) .OR. (d==11)) dispy(xn,yn,zn) = dispy(xn,yn,zn) - 1
+    !TV moves in the +y direction => bead moves in -y direction
+    !IF ((d==6) .OR. (d==8) .OR. (d==10) .OR. (d==11)) dispy(xn,yn,zn) = dispy(xn,yn,zn) - 1
+    !2**(6-1) + 2**(8-1) + 2**(10-1) + 2**(11-1) == 1696
     dispy(xn,yn,zn) = dispy(xn,yn,zn) - ishft(iand(dmask,1696), 1-d)
 
-    ! TV moves in the -x direction => bead moves in +x direction
-    ! 2**(1-1) + 2**(3-1) + 2**(9-1) + 2**(11-1) == 1285
-    ! if ((d==1) .OR. (d==3) .OR. (d==9) .OR. (d==11)) dispx(xn,yn,zn) = dispx(xn,yn,zn) + 1
+    !TV moves in the -x direction => bead moves in +x direction
+    !IF ((d==1) .OR. (d==3) .OR. (d==9) .OR. (d==11)) dispx(xn,yn,zn) = dispx(xn,yn,zn) + 1
+    !2**(1-1) + 2**(3-1) + 2**(9-1) + 2**(11-1) == 1285
     dispx(xn,yn,zn) = dispx(xn,yn,zn) + ishft(iand(dmask,1285), 1-d)
 
     !TV moves in the +x direction => bead moves in -x direction
-    ! 2**(2-1) + 2**(4-1) + 2**(10-1) + 2**(12-1) == 2570
-    !if ((d==2) .OR. (d==4) .OR. (d==10) .OR. (d==12)) dispx(xn,yn,zn) = dispx(xn,yn,zn) - 1
+    !IF ((d==2) .OR. (d==4) .OR. (d==10) .OR. (d==12)) dispx(xn,yn,zn) = dispx(xn,yn,zn) - 1
+    !2**(2-1) + 2**(4-1) + 2**(10-1) + 2**(12-1) == 2570
     dispx(xn,yn,zn) = dispx(xn,yn,zn) - ishft(iand(dmask,2570), 1-d)
-
   end subroutine make_mc_move
 
 end subroutine vel
