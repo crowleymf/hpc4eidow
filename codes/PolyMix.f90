@@ -875,34 +875,34 @@ contains
   ! write_updated_model
   !==========================================================================
   subroutine write_updated_model
-    character(len=40) :: fmt100="(1024(I8))"
-    PRINT *,'Writing model file to disk after every maxsta loops'
-    PRINT *,'Total loops of:',l,'MC time:',t
-    OPEN(unit=21, file=outfile, status='unknown')
+    character(len=40) :: fmt100="(1024(i8))"
+    print *,'writing model file to disk after every maxsta loops'
+    print *,'total loops of:',l,'mc time:',t
+    open(unit=21, file=outfile, status='unknown')
 
-    !Write the box dimensions and total chain number
-    WRITE (21,fmt100) nx, ny, nz, nkt
+    !write the box dimensions and total chain number
+    write (21,fmt100) nx, ny, nz, nkt
 
-    !Write the chain lengths and chain numbers
-    WRITE (21,fmt100) nw1, nw2, nw3, nw4, nw5, nw6, nw7, nw8
-    WRITE (21,fmt100) nk1, nk2, nk3, nk4, nk5, nk6, nk7, nk8
+    !write the chain lengths and chain numbers
+    write (21,fmt100) nw1, nw2, nw3, nw4, nw5, nw6, nw7, nw8
+    write (21,fmt100) nk1, nk2, nk3, nk4, nk5, nk6, nk7, nk8
 
-    !Write the pointers that map new points
-    Do d=1,12
-       WRITE (21,fmt100) (xnp(d,i),i=1,nx)
-       WRITE (21,fmt100) (ynp(d,i),i=1,ny)
-       WRITE (21,fmt100) (znp(d,i),i=1,nz)
-    END DO
+    !write the pointers that map new points
+    do d=1,12
+       write (21,fmt100) (xnp(d,i),i=1,nx)
+       write (21,fmt100) (ynp(d,i),i=1,ny)
+       write (21,fmt100) (znp(d,i),i=1,nz)
+    end do
 
-    !Write bond code and chain number for every site
-    WRITE (21,fmt100) (((i,j,k,a(i,j,k),b(i,j,k),ket(i,j,k),k=1,nz),j=1,ny),i=1,nx)
+    !write bond code and chain number for every site
+    write (21,fmt100) (((i,j,k,a(i,j,k),b(i,j,k),ket(i,j,k),k=1,nz),j=1,ny),i=1,nx)
 
-    !Write the first monomer position of each chain and the corresponding chain length.
-    DO i=1,nkt
-       WRITE (21,fmt100) xx(i),yy(i),zz(i),nw(i)
-    END DO
-    CLOSE(unit=21)
-  END subroutine write_updated_model
+    !write the first monomer position of each chain and the corresponding chain length.
+    do i=1,nkt
+       write (21,fmt100) xx(i),yy(i),zz(i),nw(i)
+    end do
+    close(unit=21)
+  end subroutine write_updated_model
 
 end program polymix
 
