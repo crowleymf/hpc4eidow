@@ -7,6 +7,12 @@ IMPLICIT NONE
 character(len=*) :: dir_name
 INTEGER :: x,y,z,xn,yn,zn
 INTEGER :: d,dmask
+!
+! print *,  "kind: ===> ", kind(dmask)
+! print *,  "3000: " , kind(3000)
+! dmask = 7
+! print , "#: ", kind(dmask)
+! stop
 
 !Initialization
 if (t==0) THEN
@@ -20,8 +26,7 @@ if ((mod(l,maxsta)==0).AND.(l/=lold)) THEN
   call write_velocity_output
   lold=l
 end if
-
-call make_mc_move
+if (d < 13) call make_mc_move
 
 contains
   subroutine initalize
@@ -94,48 +99,9 @@ contains
 
   subroutine make_mc_move
     dmask = ishft(1,d-1)
-    !TV moves in the -y direction => bead moves in +y direction
 
-    if ( IAND(dmask,  2384) /=0 ) then
-       print *, "d is 5 7 9 12"
-       print *, "d: ", d, "dmask: ", dmask, "shift:", ishft(iand(dmask,2384), 1-d)
-    end if
-
-    if ( IAND(dmask,  1696) /=0 ) then
-       print *, "d is 6 8 10 11"
-       print *, "d: ", d, "dmask: ", dmask, "shift:", ishft(iand(dmask,1696), 1-d)
-    end if
-
-    if ( IAND(dmask,  1285) /=0 ) then
-       print *, "d is 1 3 9 11"
-       print *, "d: ", d, "dmask: ", dmask, "shift:", ishft(iand(dmask,1285), 1-d)
-    end if
-
-    if ( IAND(dmask,  2570) /=0 ) then
-       print *, "d is 2 4 10 12"
-       print *, "d: ", d, "dmask: ", dmask, "shift:", ishft(iand(dmask,2570), 1-d)
-    end if
-
-    print *, ""
-
-    !IF ((d==5) .OR. (d==7) .OR. (d==9) .OR. (d==12)) dispy(xn,yn,zn) = dispy(xn,yn,zn) + 1
-    !2**(5-1) + 2**(7-1) + 2**(9-1) + 2**(12-1) == 2384
-    dispy(xn,yn,zn) = dispy(xn,yn,zn) + ishft(iand(dmask,2384), 1-d)
-
-    !TV moves in the +y direction => bead moves in -y direction
-    !IF ((d==6) .OR. (d==8) .OR. (d==10) .OR. (d==11)) dispy(xn,yn,zn) = dispy(xn,yn,zn) - 1
-    !2**(6-1) + 2**(8-1) + 2**(10-1) + 2**(11-1) == 1696
-    dispy(xn,yn,zn) = dispy(xn,yn,zn) - ishft(iand(dmask,1696), 1-d)
-
-    !TV moves in the -x direction => bead moves in +x direction
-    !IF ((d==1) .OR. (d==3) .OR. (d==9) .OR. (d==11)) dispx(xn,yn,zn) = dispx(xn,yn,zn) + 1
-    !2**(1-1) + 2**(3-1) + 2**(9-1) + 2**(11-1) == 1285
-    dispx(xn,yn,zn) = dispx(xn,yn,zn) + ishft(iand(dmask,1285), 1-d)
-
-    !TV moves in the +x direction => bead moves in -x direction
-    !IF ((d==2) .OR. (d==4) .OR. (d==10) .OR. (d==12)) dispx(xn,yn,zn) = dispx(xn,yn,zn) - 1
-    !2**(2-1) + 2**(4-1) + 2**(10-1) + 2**(12-1) == 2570
-    dispx(xn,yn,zn) = dispx(xn,yn,zn) - ishft(iand(dmask,2570), 1-d)
+    dispy(xn,yn,zn) = dispy(xn,yn,zn) + ishft(iand(dmask,2384), 1-d) - ishft(iand(dmask,1696), 1-d)
+    dispx(xn,yn,zn) = dispx(xn,yn,zn) + ishft(iand(dmask,1285), 1-d) - ishft(iand(dmask,2570), 1-d)
   end subroutine make_mc_move
 
 end subroutine vel
