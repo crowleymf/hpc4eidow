@@ -12,7 +12,7 @@ all: PolyMix
 PolyMix: $(OBJ_FILES) 
 	$(F90) -fopenmp -o PolyMix $(OBJ_FILES)
 
-PolyMix.o: param.mod correlation.mod $(MOD_FILES) chaindynamics.o PolyMix.f90
+PolyMix.o: param.mod correlation.mod $(MOD_FILES) chaindynamics.o chaincalcs.o PolyMix.f90
 	$(F90) -fopenmp $(OPT) -c PolyMix.f90
 
 autocorrelate.o: autocorrelate.f90 param.mod
