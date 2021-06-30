@@ -6,23 +6,30 @@ module pm_subs
   character(len=:), allocatable:: dir_name
 
 contains
+  !---------------------------------------
+  !        get_pm_save_dir
+  !---------------------------------------
   subroutine get_pm_save_dir
+    use param, only:outu
     character(len=255):: arg
 
-    !FIX -- Need to define output units and format, do not use stars
     !Command Line Arguments Needed ==> save directory
     if(command_argument_count() /= 1)then
-       write(*,*)'ERROR, ONE COMMAND-LINE ARGUMENTS REQUIRED,', &
+       write(outu,'("pmsubs.f90:get_pm_save ",a,a)') &
+            'ERROR, ONE COMMAND-LINE ARGUMENTS REQUIRED,', &
             'STOPPING; MISSING SAVE DIRECTORY NAME'
        stop
     endif
 
     call get_command_argument(1, arg)   !first, read in the value
     dir_name = trim(arg)
-    write (*,*) 'saving code to----', dir_name,'----'
+    write (outu,'("PMSUBS> ",3a)') 'saving code to----', dir_name,'----'
     return
   end subroutine get_pm_save_dir
 
+  !---------------------------------------
+  !       RAN2
+  !---------------------------------------
   !This function is the random number generator used for all simulation.
   !Function from numerical recipies      
   real(kind=pm_single) FUNCTION ran2(idum)
@@ -40,32 +47,35 @@ contains
     save iv, iy, idum2
     data idum2/123456789/, iv/ntab*0/, iy/0/
 
-    IF (idum<=0) THEN
+    if (idum<=0) then
        idum = max(-idum,1)
        idum2 = idum
-       DO j = ntab + 8, 1, -1
+       do j = ntab + 8, 1, -1
 
           k = idum/iq1
           idum = ia1*(idum-k*iq1) - k*ir1
-          IF (idum<0) idum = idum + im1
-          IF (j<=ntab) iv(j) = idum
-       END DO
+          if (idum<0) idum = idum + im1
+          if (j<=ntab) iv(j) = idum
+       end do
        iy = iv(1)
-    END IF
+    end if
     k = idum/iq1
     idum = ia1*(idum-k*iq1) - k*ir1
-    IF (idum<0) idum = idum + im1
+    if (idum<0) idum = idum + im1
     k = idum2/iq2
     idum2 = ia2*(idum2-k*iq2) - k*ir2
-    IF (idum2<0) idum2 = idum2 + im2
+    if (idum2<0) idum2 = idum2 + im2
     j = 1 + iy/ndiv
     iy = iv(j) - idum2
     iv(j) = idum
-    IF (iy<1) iy = iy + imm1
+    if (iy<1) iy = iy + imm1
     ran2 = min(am*iy,rnmx)
-    RETURN
-  END FUNCTION ran2
+    return
+  end function ran2
   
+  !---------------------------------------
+  !       BIASD
+  !---------------------------------------
   ! make the random direction moves in this monte carlo scheme.
   subroutine biasd(x,d,dir_name)
 
