@@ -158,7 +158,7 @@ program polymix
      tcountmk=tcount
      valuemk=value
 
-3    continue
+!FIX if this works delete this line !!! 3    continue
      loop3: do while(1 == 1)
         xnw=xnp(d,xn)
         do while ((xnw<1).OR.(xnw>nx)) 
@@ -180,7 +180,7 @@ program polymix
               tcount=0
            end if
            call biasd(xn,d, dir_name)
-!!!go to 3
+!FIX if this works delete this line !!go to 3
         else
            exit loop3
         end if patwblock
