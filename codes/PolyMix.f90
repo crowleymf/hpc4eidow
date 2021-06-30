@@ -5,8 +5,8 @@ program polymix
 
   use pmtypes
   use param
-  use pm_subs, only: get_pm_save_dir, dir_name, ran2, biasd
-  use chaindyn, only: chaindynamics,close_chaindyn_files
+  use pm_subs, only: get_pm_save_dir, dir_name, ran2, biasd, pm_close_all_files
+  use chaindyn, only: chaindynamics
   use chaincalc, only: chaincalcs
 
   implicit none
@@ -673,7 +673,6 @@ program polymix
 
   write(outu,fmta)'Write out model file to disk for the final time'
   call write_final_model
-  call close_chaindyn_files
   stop
 
   !==========================================================================

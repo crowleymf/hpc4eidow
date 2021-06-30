@@ -33,7 +33,7 @@ chaincalcs.o: chaincalcs.f90
 vel.o: vel.f90
 	$(F90) -fopenmp $(OPT) -c $^
 
-pm_subs.o: pm_subs.f90 pmtypes_module.o
+pm_subs.o: pm_subs.f90 pmtypes_module.o chaincalcs.o chaindynamics.o
 	$(F90) -fopenmp $(OPT) -c pm_subs.f90
 
 

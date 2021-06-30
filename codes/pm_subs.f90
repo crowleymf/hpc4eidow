@@ -115,4 +115,12 @@ contains
 
   end subroutine biasd
 
+  subroutine pm_close_all_files
+    use chaindyn, only: close_chaindyn_files
+    use chaincalc, only: close_chaincalcs_files
+    call close_chaindyn_files
+    call close_chaincalcs_files
+    return
+  end subroutine pm_close_all_files
+
 end module pm_subs
