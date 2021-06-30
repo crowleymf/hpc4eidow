@@ -8,6 +8,7 @@ program polymix
   use pm_subs, only: get_pm_save_dir, dir_name, ran2, biasd, pm_close_all_files
   use chaindyn, only: chaindynamics
   use chaincalc, only: chaincalcs
+  use box_calcs, only: boxcalcs
 
   implicit none
 
