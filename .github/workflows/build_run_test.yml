@@ -11,12 +11,19 @@ jobs:
   setup:
     runs-on: ubuntu-latest
     steps:
-      - run: sudo apt-get -y install gfortran build-essential;
+      - run: sudo apt-get -y install gfortran
+      - run: sudo apt-get -y install build-essential;
+      - run: sudo apt -y update
+      - run: sudo apt -y upgrade
   build:
     needs: setup
     runs-on: ubuntu-latest
     steps:
-      - run: ls; cd model/runs/default; ls; pwd; make local;
+      - run: ls
+      - run: cd model/runs/default
+      - run: ls
+      - run: pwd
+      - run: make local;
   test:
     needs: build
     runs-on: ubuntu-latest
