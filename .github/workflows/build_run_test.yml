@@ -16,15 +16,16 @@ jobs:
       - run: sudo apt-get -y install build-essential;
       - run: sudo apt -y update
       - run: sudo apt -y upgrade
+      - run: sudo apt-get -y install tree
   build:
     needs: setup
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - run: ls
+      - run: tree
       - run: cd model/runs/default
-      - run: ls
       - run: pwd
+      - run: ls
       - run: make local;
   test:
     needs: build
