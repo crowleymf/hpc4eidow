@@ -22,12 +22,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - run: cd /hpc4eidow
       - run: tree
-      - run: cd model/runs/default
-      - run: pwd
+      - run: cd model
       - run: ls
-      - run: make local;
   test:
     needs: build
     runs-on: ubuntu-latest
