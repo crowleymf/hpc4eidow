@@ -20,6 +20,7 @@ jobs:
     needs: setup
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v2
       - run: ls
       - run: cd model/runs/default
       - run: ls
