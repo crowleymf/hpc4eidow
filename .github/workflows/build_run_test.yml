@@ -17,7 +17,6 @@ jobs:
       - run: sudo apt -y update
       - run: sudo apt -y upgrade
       - run: sudo apt-get -y install tree
-      - uses: actions/checkout@v2
       - run: tree
       - run: cd model/runs/default; ls; make local
       - run: cd model; python golden_test.py
