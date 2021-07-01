@@ -17,6 +17,7 @@ jobs:
       - run: sudo apt -y update
       - run: sudo apt -y upgrade
       - run: sudo apt-get -y install tree
+
   build:
     needs: setup
     runs-on: ubuntu-latest
@@ -24,11 +25,11 @@ jobs:
       - uses: actions/checkout@v2
       - run: tree
       - run: cd model/runs/default; ls; make local
-    - name: Archive
-      uses: actions/upload-artifact@v2
-      with:
-        name: default_logs
-        path: hpc4eidow/model/runs/defualt/output/*
+    uses: actions/upload-artifact@master
+    with:
+      name: upload_artifact
+      path: ~/.
+
   test:
     needs: build
     runs-on: ubuntu-latest
