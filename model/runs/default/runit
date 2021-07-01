@@ -1,0 +1,34 @@
+#!/bin/bash
+#SBATCH -J sys1
+#SBATCH --qos=high
+#SBATCH -N 1
+#SBATCH --ntasks-per-node=1
+#SBATCH -t 4:00:00
+#SBATCH -A hpc4eidow
+#echo commands to stdout
+
+SCRIPT_LOCATION=`pwd`
+
+#-- pushd $SCRIPT_LOCATION/../../../codes
+#-- ! echo "Navigated to "$SCRIPT_LOCATION'/../../../codes'
+#-- make clean
+#-- setenv OPT "-g"
+#-- make -e all
+#-- ls
+#-- echo "Finished building PolyMix"
+#-- popd
+
+polymix=$SCRIPT_LOCATION'/../../../codes/PolyMix'
+
+echo "I ------ Unzipping the model.out file"
+unzip -o  -q model.out.zip
+
+if [ ! -d output ] ; then echo "II ----- Making output/";mkdir output; else echo "II ----- output/ exists"; fi
+
+echo "III ---- Running PolyMix " $polymix
+time $polymix output/ 2>&1 | tee log.txt 
+
+echo "removing model.out"
+rm model.out
+
+exit
