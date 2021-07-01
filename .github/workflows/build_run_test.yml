@@ -28,4 +28,4 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - run: python golden_test.py
+      - run: cd model; python golden_test.py
