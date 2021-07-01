@@ -28,9 +28,10 @@ class testFiles(unittest.TestCase):
     # checks if the files have the same values
     def test_compare_files(self):
         print("\n"+"=="*10+"start test_compare_files"+"=="*10)
-
+        all_error = ""
         # for every file in both the golden and default runs
         for comparable_file in filenames:
+            error = ""
             golden_file_output = None
             second_file_output = None
 
@@ -56,13 +57,21 @@ class testFiles(unittest.TestCase):
             # If both the files have been found and had lines in them
             if not second_file_output == None and not golden_file_output == None:
                 # check if everyline is good
+                line_num = 0
                 for lines in zip(second_file_output, golden_file_output):
                     second_file_line = lines[0].split()
                     golden_file_line = lines[1].split()
-                    self.assertEqual(len(second_file_line), len(golden_file_line))
                     for words in zip(second_file_line, golden_file_line):
-                        self.assertEqual(words[0][:-2],words[1][:-2], comparable_file + " has an error")
-                print("\tProcessed {}".format(comparable_file))
+                        if words[0][:-2] != words[1][:-2]:
+                            error = error + "\nline num: {:<20}output:{:<20}Expected:{}".format(line_num,words[0][:-2], words[1][:-2])
+                    line_num= line_num+1
+            if error!="":
+                error = comparable_file +"\n" + error
+                all_error = error + all_error
+
+        print(all_error)
+        self.assertEqual(all_error,"")
+        print("\tProcessed {}".format(comparable_file))
         print("=="*10+"test_compare_files compleate"+"=="*10)
 
 
