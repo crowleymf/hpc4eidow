@@ -16,7 +16,7 @@ jobs:
     needs: setup
     runs-on: ubuntu-latest
     steps:
-      - run: cd model; cd runs/default; ls; pwd; make local;
+      - run: ls; cd model/runs/default; ls; pwd; make local;
   test:
     needs: build
     runs-on: ubuntu-latest
