@@ -1,0 +1,23 @@
+name: Build, Run and Test
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    steps:
+      - run: sudo apt-get -y install gfortran build-essential;
+  build:
+    needs: setup
+    runs-on: ubuntu-latest
+    steps:
+      - run: cd model; cd runs/default; ls; pwd; make local;
+  test:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - run: python golden_test.py
