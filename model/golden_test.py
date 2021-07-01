@@ -61,7 +61,7 @@ class testFiles(unittest.TestCase):
                     golden_file_line = lines[1].split()
                     self.assertEqual(len(second_file_line), len(golden_file_line))
                     for words in zip(second_file_line, golden_file_line):
-                        self.assertEqual(words[0][:-2],words[1][:-2], comparable_file + "has an error")
+                        self.assertEqual(words[0][:-2],words[1][:-2], comparable_file + " has an error")
                 print("\tProcessed {}".format(comparable_file))
         print("=="*10+"test_compare_files compleate"+"=="*10)
 
