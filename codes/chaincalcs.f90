@@ -769,27 +769,6 @@ contains
     return
   end subroutine open_chaincalcs_files
 
-  subroutine close_chaincalcs_files
-    !--- Formatted files --------
-    close(unit = 40)
-    close(unit = 41)
-    close(unit = 42)
-    close(unit = 43)
-    close(unit = 44)
-    close(unit = 45)
-    close(unit = 46)
-    close(unit = 47)
-
-    !--- Unformatted files --------
-    close(unit = 30)
-    close(unit = 31)
-    close(unit = 32)
-    close(unit = 33)
-    close(unit = 34)
-    close(unit = 35)
-    return
-  end subroutine close_chaincalcs_files
-
   subroutine write_chaincalcs_headers
     write(40,fmt302) 'l', 'ete', 'etedev', 'rog', 'rogdev', 'maxete', 't'
     write(41,fmt303) 'l', 'ete', 'etedev', 'etepara', 'eteparadev', 'eteperp', 'eteperpdev', 'rog', 'rogdev'
