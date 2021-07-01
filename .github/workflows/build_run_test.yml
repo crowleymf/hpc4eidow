@@ -8,7 +8,7 @@ on:
 
 
 jobs:
-  setup:
+  setup_run_build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -17,21 +17,7 @@ jobs:
       - run: sudo apt -y update
       - run: sudo apt -y upgrade
       - run: sudo apt-get -y install tree
-
-  build:
-    needs: setup
-    runs-on: ubuntu-latest
-    steps:
       - uses: actions/checkout@v2
       - run: tree
       - run: cd model/runs/default; ls; make local
-    uses: actions/upload-artifact@master
-    with:
-      name: upload_artifact
-      path: ~/.
-
-  test:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
       - run: cd model; python golden_test.py
