@@ -21,9 +21,6 @@ autocorrelate.o: autocorrelate.f90 param.mod pm_subs.o
 chaindynamics.o: chaindynamics.f90 correlation.mod 
 	$(F90) -fopenmp $(OPT) -c $<
 
-biasd.o: biasd.f90 pm_subs.o
-	$(F90) -fopenmp $(OPT) -c biasd.f90
-
 boxcalcs.o: boxcalcs.f90
 	$(F90) -fopenmp $(OPT) -c $^
 
