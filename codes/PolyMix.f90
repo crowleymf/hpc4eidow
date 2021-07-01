@@ -9,6 +9,7 @@ program polymix
   use chaindyn, only: chaindynamics
   use chaincalc, only: chaincalcs
   use box_calcs, only: boxcalcs
+  use autocorr,only: autocorrelate
 
   implicit none
 
@@ -44,7 +45,7 @@ program polymix
 
   !Call subroutines for initialization
   call chaincalcs(dir_name)
-  call boxcalcs(dir_name)
+  call boxcalcs
   call chaindynamics(dir_name)
   call vel(xn,yn,zn,d, dir_name)
 
@@ -639,7 +640,7 @@ program polymix
 
      l=l+1
      call chaincalcs(dir_name)
-     call boxcalcs(dir_name)
+     call boxcalcs
 
      !Bipolar shear flow update
      if (l >= nequil) then
@@ -659,7 +660,7 @@ program polymix
            pmy(x)=pzero+pnew*(xdiv-xdiv*xdiv)
            pxz(x)=pzero
         end do
-        call autocorrelate(dir_name)
+        call autocorrelate
      end if
 
      !output the undated model
@@ -674,6 +675,8 @@ program polymix
 
   write(outu,fmta)'Write out model file to disk for the final time'
   call write_final_model
+  call pm_close_all_files
+
   stop
 
   !==========================================================================
