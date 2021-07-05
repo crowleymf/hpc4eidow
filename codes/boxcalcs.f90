@@ -5,7 +5,7 @@ module box_calcs
 
   integer :: x,y,z
   integer :: loop,length,point,boxcount,count
-  real(kind=pm_dbl) :: rdsqrt,thetax,thetay,thetaz
+  real(kind=pm_dbl) :: thetax,thetay,thetaz
 
   real(kind=pm_dbl), allocatable :: sxy(:),sxz(:),syz(:),sxx(:),syy(:),szz(:)
   integer, allocatable :: binnw1(:),binnw2(:),binnw3(:),binnw4(:), &
@@ -29,18 +29,23 @@ module box_calcs
   real(kind=pm_dbl) :: sxxtemp,syytemp,szztemp
   real(kind=pm_dbl) :: sxybintmp,sxzbintmp,syzbintmp
   real(kind=pm_dbl) :: sxxbintmp,syybintmp,szzbintmp
-  real(kind=pm_dbl) :: density1tmp,density2tmp,density3tmp,density4tmp,density5tmp,density6tmp,density7tmp,density8tmp
-  real(kind=pm_dbl) :: segdensity1tmp,segdensity2tmp,segdensity3tmp,segdensity4tmp, &
-       segdensity5tmp,segdensity6tmp,segdensity7tmp,segdensity8tmp
+  real(kind=pm_dbl) :: density1tmp,density2tmp,density3tmp,density4tmp, &
+       density5tmp,density6tmp,density7tmp,density8tmp
+  real(kind=pm_dbl) :: segdensity1tmp,segdensity2tmp,segdensity3tmp, &
+       segdensity4tmp, segdensity5tmp,segdensity6tmp,segdensity7tmp,segdensity8tmp
 
   real(kind=pm_dbl) :: sxysumtemp,sxzsumtemp,syzsumtemp
   real(kind=pm_dbl) :: sxxsumtemp,syysumtemp,szzsumtemp
   real(kind=pm_dbl), allocatable :: sxysumbintmp(:),sxzsumbintmp(:),syzsumbintmp(:)
   real(kind=pm_dbl), allocatable :: sxxsumbintmp(:),syysumbintmp(:),szzsumbintmp(:)
-  real(kind=pm_dbl), allocatable :: density1sum(:),density2sum(:),density3sum(:),density4sum(:)
-  real(kind=pm_dbl), allocatable :: density5sum(:),density6sum(:),density7sum(:),density8sum(:)
-  real(kind=pm_dbl), allocatable :: segdensity1sum(:),segdensity2sum(:),segdensity3sum(:),segdensity4sum(:)
-  real(kind=pm_dbl), allocatable :: segdensity5sum(:),segdensity6sum(:),segdensity7sum(:),segdensity8sum(:)
+  real(kind=pm_dbl), allocatable :: density1sum(:),density2sum(:),density3sum(:), &
+       density4sum(:)
+  real(kind=pm_dbl), allocatable :: density5sum(:),density6sum(:),density7sum(:), &
+       density8sum(:)
+  real(kind=pm_dbl), allocatable :: segdensity1sum(:),segdensity2sum(:), &
+       segdensity3sum(:),segdensity4sum(:)
+  real(kind=pm_dbl), allocatable :: segdensity5sum(:),segdensity6sum(:), &
+       segdensity7sum(:),segdensity8sum(:)
 
   real(kind=pm_dbl) :: sxyfinal,sxzfinal,syzfinal
   real(kind=pm_dbl) :: sxxfinal,syyfinal,szzfinal
@@ -66,7 +71,7 @@ contains
     !---        lattice site density and segmental density.
     use pm_subs,only: dir_name
     implicit none
-  
+
     allocate (sxy(nx),sxz(nx),syz(nx),sxx(nx),syy(nx),szz(nx))
     allocate (binnw1(nx),binnw2(nx),binnw3(nx),binnw4(nx),binnw5(nx),binnw6(nx),binnw7(nx),binnw8(nx))
     allocate (density1(nx),density2(nx),density3(nx),density4(nx),density5(nx),density6(nx),density7(nx),density8(nx))
@@ -105,7 +110,7 @@ contains
        call write_density_data
     enddo xloop1
 
-    denom = 1.d0 / real(nx, kind=pm_dbl)
+    denom = one / real(nx, kind=pm_dbl)
 
     sxybox = sxytot*denom
     sxzbox = sxztot*denom
@@ -173,7 +178,7 @@ contains
           enddo readx
        enddo read1
 
-       denom = 1.d0 / real(maxsta, kind=pm_dbl)
+       denom = one / real(maxsta, kind=pm_dbl)
 
        sxyfinal = sxysumtemp*denom
        sxzfinal = sxzsumtemp*denom
@@ -201,7 +206,7 @@ contains
           syybinfinal = syysumbintmp(x)*denom
           szzbinfinal = szzsumbintmp(x)*denom
           write(56,fmt402) x, sxybinfinal, sxzbinfinal, syzbinfinal, &
-                              sxxbinfinal, syybinfinal, szzbinfinal
+               sxxbinfinal, syybinfinal, szzbinfinal
 
           density1final = density1sum(x)*denom
           density2final = density2sum(x)*denom
@@ -244,7 +249,17 @@ contains
     deallocate (segdensity1,segdensity2,segdensity3,segdensity4,segdensity5,segdensity6,segdensity7,segdensity8)
     return
 
+
+    !==============================================================
+    !==============================================================
+    !=========   CONTAINED SUBROUTINES ============================
+    !==============================================================
+    !==============================================================
   contains
+
+    !---------------------------------
+    !          write_density_data
+    !---------------------------------
     subroutine write_density_data
       write(52) x, sxy(x),sxz(x),syz(x),sxx(x),syy(x),szz(x)
       write(53) x, density1(x),density2(x),density3(x),density4(x),density5(x),density6(x),density7(x),density8(x)
@@ -253,29 +268,33 @@ contains
       return
     end subroutine write_density_data
 
+    !---------------------------------
+    !        init_setup
+    !---------------------------------
     subroutine init_setup
-      rdsqrt = 1.d0/sqrt(2.d0)
-
+      !-- replace with parameter isqrt2----- rdsqrt = 1.d0/sqrt(2.d0)
       boxcount = 0
-
-      sxytot = 0.d0
-      sxztot = 0.d0
-      syztot = 0.d0
-      sxxtot = 0.d0
-      syytot = 0.d0
-      szztot = 0.d0
+      sxytot = zero
+      sxztot = zero
+      syztot = zero
+      sxxtot = zero
+      syytot = zero
+      szztot = zero
       return
     end subroutine init_setup
 
+    !---------------------------------
+    !          init_nx_loop
+    !---------------------------------
     subroutine init_nx_loop
       count = 0
 
-      sxybin = 0.d0
-      sxzbin = 0.d0
-      syzbin = 0.d0
-      sxxbin = 0.d0
-      syybin = 0.d0
-      szzbin = 0.d0
+      sxybin = zero
+      sxzbin = zero
+      syzbin = zero
+      sxxbin = zero
+      syybin = zero
+      szzbin = zero
 
       binnw1(x) = 0
       binnw2(x) = 0
@@ -285,8 +304,12 @@ contains
       binnw6(x) = 0
       binnw7(x) = 0
       binnw8(x) = 0
+      return
     end subroutine init_nx_loop
 
+    !---------------------------------
+    !          calc_density
+    !---------------------------------
     subroutine calc_density
       k = ket(x,y,z)
       atemp = a(x,y,z)
@@ -309,8 +332,12 @@ contains
       elseif (length == nw8) then
          binnw8(x) = binnw8(x) + 1
       endif
+      return
     end subroutine calc_density
 
+    !---------------------------------
+    !          calc_stress
+    !---------------------------------
     subroutine calc_stress
       !stress calculations
       if(atemp /= 13) then
@@ -318,9 +345,9 @@ contains
          dy = py(atemp)
          dz = pz(atemp)
 
-         thetax = real(dx, kind=pm_dbl)*rdsqrt
-         thetay = real(dy, kind=pm_dbl)*rdsqrt
-         thetaz = real(dz, kind=pm_dbl)*rdsqrt
+         thetax = real(dx, kind=pm_dbl)*isqrt2
+         thetay = real(dy, kind=pm_dbl)*isqrt2
+         thetaz = real(dz, kind=pm_dbl)*isqrt2
 
          sxybin = sxybin + thetax*thetay
          sxzbin = sxzbin + thetax*thetaz
@@ -332,8 +359,12 @@ contains
          count = count + 1
          boxcount = boxcount + 1
       end if
+      return
     end subroutine calc_stress
 
+    !---------------------------------
+    !          density_shift
+    !---------------------------------
     subroutine density_shift
       !density calculations
       if (length == nw1) then
@@ -353,8 +384,12 @@ contains
       elseif (length == nw8) then
          binnw8(x) = binnw8(x) + 1
       endif
+      return
     end subroutine density_shift
 
+    !---------------------------------
+    !          stress_shift
+    !---------------------------------
     subroutine stress_shift
       !stress calculations
       if(atemp /= 13) then
@@ -362,9 +397,9 @@ contains
          dy = py(atemp)
          dz = pz(atemp)
 
-         thetax = real(dx, kind=pm_dbl)/rdsqrt
-         thetay = real(dy, kind=pm_dbl)/rdsqrt
-         thetaz = real(dz, kind=pm_dbl)/rdsqrt
+         thetax = real(dx, kind=pm_dbl)/isqrt2
+         thetay = real(dy, kind=pm_dbl)/isqrt2
+         thetaz = real(dz, kind=pm_dbl)/isqrt2
 
          sxybin = sxybin + thetax*thetay
          sxzbin = sxzbin + thetax*thetaz
@@ -376,10 +411,14 @@ contains
          count = count + 1
          boxcount = boxcount + 1
       endif
+      return
     end subroutine stress_shift
 
+    !---------------------------------
+    !          normalize
+    !---------------------------------
     subroutine normalize
-      denom = 1.d0/real(count, kind=pm_dbl)
+      denom = one/real(count, kind=pm_dbl)
 
       sxy(x) = sxybin*denom
       sxz(x) = sxzbin*denom
@@ -397,8 +436,11 @@ contains
       return
     end subroutine normalize
 
+    !---------------------------------
+    !          lattice_density
+    !---------------------------------
     subroutine lattice_density
-      denom = 2.d0 / real(ny*nz, kind=pm_dbl)
+      denom = two / real(ny*nz, kind=pm_dbl)
       !lattice density
       density1(x) = real(binnw1(x), kind=pm_dbl)*denom
       density2(x) = real(binnw2(x), kind=pm_dbl)*denom
@@ -411,6 +453,9 @@ contains
       return
     end subroutine lattice_density
 
+    !---------------------------------
+    !          segmental_density
+    !---------------------------------
     subroutine segmental_density
       !segmental density
       segdensity1(x) = real(binnw1(x), kind=pm_dbl)
@@ -424,51 +469,59 @@ contains
       return
     end subroutine segmental_density
 
+    !---------------------------------
+    !          zero_out
+    !---------------------------------
     subroutine zero_out
-      sxysumtemp = 0.d0
-      sxzsumtemp = 0.d0
-      syzsumtemp = 0.d0
-      sxxsumtemp = 0.d0
-      syysumtemp = 0.d0
-      szzsumtemp = 0.d0
+      sxysumtemp = zero
+      sxzsumtemp = zero
+      syzsumtemp = zero
+      sxxsumtemp = zero
+      syysumtemp = zero
+      szzsumtemp = zero
 
       do x = 1, nx
-         sxysumbintmp(x) = 0.d0
-         sxzsumbintmp(x) = 0.d0
-         syzsumbintmp(x) = 0.d0
-         sxxsumbintmp(x) = 0.d0
-         syysumbintmp(x) = 0.d0
-         szzsumbintmp(x) = 0.d0
+         sxysumbintmp(x) = zero
+         sxzsumbintmp(x) = zero
+         syzsumbintmp(x) = zero
+         sxxsumbintmp(x) = zero
+         syysumbintmp(x) = zero
+         szzsumbintmp(x) = zero
 
-         density1sum(x) = 0.d0
-         density2sum(x) = 0.d0
-         density3sum(x) = 0.d0
-         density4sum(x) = 0.d0
-         density5sum(x) = 0.d0
-         density6sum(x) = 0.d0
-         density7sum(x) = 0.d0
-         density8sum(x) = 0.d0
+         density1sum(x) = zero
+         density2sum(x) = zero
+         density3sum(x) = zero
+         density4sum(x) = zero
+         density5sum(x) = zero
+         density6sum(x) = zero
+         density7sum(x) = zero
+         density8sum(x) = zero
 
-         segdensity1sum(x) = 0.d0
-         segdensity2sum(x) = 0.d0
-         segdensity3sum(x) = 0.d0
-         segdensity4sum(x) = 0.d0
-         segdensity5sum(x) = 0.d0
-         segdensity6sum(x) = 0.d0
-         segdensity7sum(x) = 0.d0
-         segdensity8sum(x) = 0.d0
+         segdensity1sum(x) = zero
+         segdensity2sum(x) = zero
+         segdensity3sum(x) = zero
+         segdensity4sum(x) = zero
+         segdensity5sum(x) = zero
+         segdensity6sum(x) = zero
+         segdensity7sum(x) = zero
+         segdensity8sum(x) = zero
       enddo
+      return
     end subroutine zero_out
 
   end subroutine boxcalcs
 
+
+  !---------------------------------
+  !    open_boxcalcs_files
+  !---------------------------------
   subroutine open_boxcalcs_files(dir_name)
     character(len=*) :: dir_name
     open(unit=51, file=dir_name//'tmpstressbox.tmp', form='unformatted')
     open(unit=52, file=dir_name//'tmpstressbin.tmp', form='unformatted')
     open(unit=53, file=dir_name//'tmpdensity.tmp', form='unformatted')
     open(unit=54, file=dir_name//'tmpsegdensity.tmp',form='unformatted')
-    
+
     open(unit=55, file=dir_name//'stressbox.dat', form='formatted')
     open(unit=56, file=dir_name//'stressbin.dat', form='formatted')
     open(unit=57, file=dir_name//'latticedensity.dat', form='formatted')
@@ -476,6 +529,9 @@ contains
     return  
   end subroutine open_boxcalcs_files
 
+  !---------------------------------
+  !    write_boxcalcs_col_header
+  !---------------------------------
   subroutine write_boxcalcs_col_header
     write(55,fmt400) 'l', 'sxy', 'sxz', 'syz', 'sxx', 'syy', 'szz'
     write(56,fmt400) 'x', 'sxy', 'sxz', 'syz', 'sxx', 'syy', 'szz'

@@ -24,14 +24,14 @@ contains
        call open_autocorr_files
     endif
 
-    autoetetot=0.D0
+    autoetetot=zero
     do k=1,nkt
        autoetechain=ete(k)*eteold(k)
        autoetetot=autoetetot+autoetechain
     enddo
     autoete=autoetetot/real(nkt,kind=pm_dbl)
 
-    autoveltot = 0.d0
+    autoveltot = zero
     do ix=1,nx
        autovelbin=avgvy(ix)*vyold(ix)
        autoveltot=autoveltot+autovelbin
@@ -45,8 +45,8 @@ contains
     write(70) autoete,autovel 
 
     if (mod((l-nequil),nauto)==0 .and. l/=nequil) then
-       autoetesum=0.d0
-       autovelsum=0.d0
+       autoetesum=zero
+       autovelsum=zero
 
        rewind(70)
 

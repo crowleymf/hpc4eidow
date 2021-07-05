@@ -106,7 +106,7 @@ program polymix
         a(xb,yb,zb)=ba
         b(xa,ya,za)=pp(ba)
 
-        if (ran2(iseed)>0.5d0) then
+        if (ran2(iseed)>half) then
            ket(xa,ya,za)=k
            dcon=da
         else 
@@ -648,9 +648,9 @@ program polymix
 
         !FIX can we delete this?
         !  do x=1,nx
-        !   xdiv=real(x,kind=pm_dbl)/real(nx+1,kind=pm_dbl)-0.5d0
-        !   ppy(x)=pzero*(1.d0+pnew*xdiv)
-        !   pmy(x)=pzero*(1.d0-pnew*xdiv)
+        !   xdiv=real(x,kind=pm_dbl)/real(nx+1,kind=pm_dbl)-half
+        !   ppy(x)=pzero*(one+pnew*xdiv)
+        !   pmy(x)=pzero*(one-pnew*xdiv)
         !   pxz(x)=pzero
         !  end do
 
@@ -690,9 +690,9 @@ contains
   subroutine init_vars_1
     value=10
     l=0
-    t=0.D0
+    t=zero
     d=0
-    pzero=1.D0/3.D0
+    pzero=third
     iseed=10
     !st=0
     !w=0
@@ -705,7 +705,7 @@ contains
 
     write(outu,fmta)'data.in,conf.in and model.bin file read in'
     !Define fundamental time step
-    tu=2.D0/(real(nx,kind=pm_dbl)*real(ny,kind=pm_dbl)*real(nz,kind=pm_dbl))
+    tu=two/(real(nx,kind=pm_dbl)*real(ny,kind=pm_dbl)*real(nz,kind=pm_dbl))
 
     allocate (ppy(nx),pmy(nx),pxz(nx))
 
@@ -717,9 +717,9 @@ contains
     !PRINT *, 'Assigning biasing value. pmax=', pmax
     !!Assign the initial biasing to generate the bipolar shear flow
     !DO x=1,nx
-    ! xdiv=real(x,kind=pm_dbl)/real(nx+1,kind=pm_dbl)-0.5D0
-    ! ppy(x)=pzero*(1.D0+pmax*xdiv)
-    ! pmy(x)=pzero*(1.D0-pmax*xdiv)
+    ! xdiv=real(x,kind=pm_dbl)/real(nx+1,kind=pm_dbl)-half
+    ! ppy(x)=pzero*(one+pmax*xdiv)
+    ! pmy(x)=pzero*(one-pmax*xdiv)
     ! pxz(x)=pzero
     !END DO
     !=========================================================================
