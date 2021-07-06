@@ -63,7 +63,7 @@ class testFiles(unittest.TestCase):
                     golden_file_line = lines[1].split()
                     for words in zip(second_file_line, golden_file_line):
                         if words[0][:-2] != words[1][:-2]:
-                            error = error + "\nline num: {:<20}output:{:<20}Expected:{}".format(line_num,words[0][:-2], words[1][:-2])
+                            error = error + "\nline num: {:<20} output:{:<20} Expected:{}".format(line_num,words[0][:-2], words[1][:-2])
                     line_num= line_num+1
             if error!="":
                 error = "\n\n"+ comparable_file +"\n" + error
