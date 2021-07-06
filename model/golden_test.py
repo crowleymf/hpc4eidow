@@ -66,7 +66,7 @@ class testFiles(unittest.TestCase):
                             error = error + "\nline num: {:<20}output:{:<20}Expected:{}".format(line_num,words[0][:-2], words[1][:-2])
                     line_num= line_num+1
             if error!="":
-                error = comparable_file +"\n" + error
+                error = "\n\n"+ comparable_file +"\n" + error
                 all_error = error + all_error
 
         print(all_error)
