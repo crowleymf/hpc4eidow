@@ -750,22 +750,22 @@ contains
 
     dir_name = trim(adjustl(dir_name))
     !--- Formatted files --------
-    OPEN(unit = 40, file=dir_name//'etedynamicbox.dat', form = 'formatted')
-    OPEN(unit = 41, file=dir_name//'chainproperties.dat', form = 'formatted')
-    OPEN(unit = 42, file=dir_name//'etedynamicbin.dat', form = 'formatted')
-    OPEN(unit = 43, file=dir_name//'boxorder.dat', form = 'formatted')
-    OPEN(unit = 44, file=dir_name//'chainends.dat', form = 'formatted')
-    OPEN(unit = 45, file=dir_name//'binchainproperties.dat', form = 'formatted')
-    OPEN(unit = 46, file=dir_name//'nkcom.dat', form = 'formatted')
-    OPEN(unit = 47, file=dir_name//'binorder.dat', form = 'formatted')
+    open(unit = 40, file=dir_name//'etedynamicbox.dat', form = 'formatted')
+    open(unit = 41, file=dir_name//'chainproperties.dat', form = 'formatted')
+    open(unit = 42, file=dir_name//'etedynamicbin.dat', form = 'formatted')
+    open(unit = 43, file=dir_name//'boxorder.dat', form = 'formatted')
+    open(unit = 44, file=dir_name//'chainends.dat', form = 'formatted')
+    open(unit = 45, file=dir_name//'binchainproperties.dat', form = 'formatted')
+    open(unit = 46, file=dir_name//'nkcom.dat', form = 'formatted')
+    open(unit = 47, file=dir_name//'binorder.dat', form = 'formatted')
 
-    !--- Unformatted files --------
-    OPEN(unit = 30, file=dir_name//'tmpetedynamicbox.tmp', form = 'unformatted')
-    OPEN(unit = 31, file=dir_name//'tmpchainproperties.tmp',form='unformatted')
-    OPEN(unit = 32, file=dir_name//'tmpetedynamicbin.tmp', form = 'unformatted')
-    OPEN(unit = 33, file=dir_name//'tmpetestaticbox.tmp', form = 'unformatted')
-    OPEN(unit = 34, file=dir_name//'tmpnkcombin.tmp', form = 'unformatted')
-    OPEN(unit = 35, file=dir_name//'tmporderbin.tmp', form = 'unformatted')
+    !--- unformatted files --------
+    open(unit = 30, file=dir_name//'tmpetedynamicbox.tmp', form = 'unformatted')
+    open(unit = 31, file=dir_name//'tmpchainproperties.tmp',form='unformatted')
+    open(unit = 32, file=dir_name//'tmpetedynamicbin.tmp', form = 'unformatted')
+    open(unit = 33, file=dir_name//'tmpetestaticbox.tmp', form = 'unformatted')
+    open(unit = 34, file=dir_name//'tmpnkcombin.tmp', form = 'unformatted')
+    open(unit = 35, file=dir_name//'tmporderbin.tmp', form = 'unformatted')
     return
   end subroutine open_chaincalcs_files
 
