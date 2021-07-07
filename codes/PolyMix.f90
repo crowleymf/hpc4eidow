@@ -5,7 +5,9 @@ program polymix
 
   use pmtypes
   use param
-  use pm_subs, only: get_pm_save_dir, dir_name, ran2
+  use pm_subs, only: get_pm_save_dir, dir_name, ran2, biasd, pm_close_all_files
+  use chaindyn, only: chaindynamics
+  use chaincalc, only: chaincalcs
 
   implicit none
 
@@ -29,6 +31,7 @@ program polymix
   integer :: con(code,code), cn(code1,code)
   integer :: cr(code1,code,code), bn(code1,code1)
   integer :: ds(code1),dm(code1)
+  character(len=10) :: fmta='("PM> ",a)'
 
   !Initialization
   call get_pm_save_dir
@@ -36,46 +39,13 @@ program polymix
   call read_infile
   call read_conf_file
   call read_and_allocate_model
-
-  !FIX -- dont use print statements except for debugging
-  PRINT *, 'data.in,conf.in and model.bin file read in'
-  !Define fundamental time step
-  tu=2.D0/(real(nx,kind=pm_dbl)*real(ny,kind=pm_dbl)*real(nz,kind=pm_dbl))
-
-  allocate (ppy(nx),pmy(nx),pxz(nx))
-
-  !FIX -- can we delete this stuff?
-  !PRINT *, 'Assigning biasing value. pmax=', pmax
-  !!Assign the initial biasing to generate the bipolar shear flow
-  !DO x=1,nx
-  ! xdiv=real(x,kind=pm_dbl)/real(nx+1,kind=pm_dbl)-0.5D0
-  ! ppy(x)=pzero*(1.D0+pmax*xdiv)
-  ! pmy(x)=pzero*(1.D0-pmax*xdiv)
-  ! pxz(x)=pzero
-  !END DO
-
-  !FIX -- Aghhh another print
-  PRINT *, 'Assigning biasing value. pmax=', pmax
-  !Assign the initial biasing to generate the bipolar parabolic flow
-  DO x=1,nx
-     xdiv=real(x-1,kind=pm_dbl)/real(nx-1,kind=pm_dbl)
-     ppy(x)=pzero-pmax*(xdiv-xdiv*xdiv)
-     pmy(x)=pzero+pmax*(xdiv-xdiv*xdiv)
-     pxz(x)=pzero
-  END DO
-
-  PRINT *, 'Bipolar Velocity Profile Assigned'
-
-  !Assign the initial xd,yd,and zd array value
-  xd(1:nkt)=xx(1:nkt)
-  yd(1:nkt)=yy(1:nkt)
-  zd(1:nkt)=zz(1:nkt)
+  call init_vars_2
 
   !Call subroutines for initialization
-  CALL chaincalcs(dir_name)
-  CALL boxcalcs(dir_name)
-  CALL chaindynamics(dir_name)
-  CALL vel(xn,yn,zn,d, dir_name)
+  call chaincalcs(dir_name)
+  call boxcalcs(dir_name)
+  call chaindynamics(dir_name)
+  call vel(xn,yn,zn,d, dir_name)
 
 
   !================================================================A
@@ -83,27 +53,27 @@ program polymix
   !Do the Monte Carlo moves
   !================================================================A
   mcloop: do while (l<maxloops)
-     !FIX delete if cycle works: 2    continue
      c=0
      k0=0
 
-     !Randomly select a point on the lattice. We keep trying for a point until we get a kink, or chain end.
-     l1: DO WHILE (c<=3 .OR. c==7)
+     !-- Randomly select a point on the lattice. 
+     !-- Keep trying for a point until we get a kink, or chain end.
+     l1: do while (c<=3 .or. c==7)
         xn=int(ran2(iseed)*real(nx,pm_dbl))+1
         yn=int(ran2(iseed)*real(ny,pm_dbl))+1
         zn=int(ran2(iseed)*real(nz,pm_dbl))+1
-        !Access the number of the selected chain; save it as k0.
+        !access the number of the selected chain; save it as k0.
         k0=ket(xn,yn,zn)
-        !Get the a and b codes so that the bond angle can be determined
-        !from data structure con(a,b). If position is a chain "kink" or end,
+        !get the a and b codes so that the bond angle can be determined
+        !from data structure con(a,b). if position is a chain "kink" or end,
         !con returns a value greater than 3.
 
-        IF (k0>0) THEN
+        if (k0>0) then
            pa=a(xn,yn,zn)
            pb=b(xn,yn,zn)
            c=con(pa,pb)
-        END IF
-     END DO l1
+        end if
+     end do l1
 
      !k is a label which keeps track of the chain on which the tv was first created.
      !k will never be a ket number in the box as it is one more than the amount of chains that are present in the box
@@ -113,11 +83,11 @@ program polymix
      k=nkt+1
      e=0
 
+
+     cselect1: select case (c)
      !c=4 represents a kink.
      !Remove a chain segment and label an adjacent segment.
      !Which adjacent segment to label is chosen randomly.
-
-     cselect: select case (c)
      case (4)
         da=a(xn,yn,zn)
         db=b(xn,yn,zn)
@@ -134,16 +104,16 @@ program polymix
         a(xb,yb,zb)=ba
         b(xa,ya,za)=pp(ba)
 
-        IF (ran2(iseed)>0.5D0) THEN
+        if (ran2(iseed)>0.5d0) then
            ket(xa,ya,za)=k
            dcon=da
-        ELSE 
+        else 
            ket(xb,yb,zb)=k
            dcon=db
-        END IF
+        end if
 
         !c=5 specifies a chain end at b=13
-        !Shorten the chain by one and label the end of the chain
+        !shorten the chain by one and label the end of the chain
         !position with a value of k=nk+1 for the chain number.
 
      case (5)
@@ -166,7 +136,7 @@ program polymix
         zz(k0)=z
 
         !c=6 specifies a chain end at a=13
-        !Shorten the chain by one and label the end of the chain
+        !shorten the chain by one and label the end of the chain
         !position with a value of k=nk+1 for the chain number.
 
      case(6)
@@ -180,45 +150,55 @@ program polymix
 
         dcon=d
 
-     END select cselect
+     end select cselect1
 
-     CALL biasd(xn,d, dir_name)
+     call biasd(xn,d, dir_name)
 
      tmk=t
      tcountmk=tcount
      valuemk=value
 
-3    CONTINUE
-
-     xnw=xnp(d,xn)
-
-     do while ((xnw<1).OR.(xnw>nx)) 
-        CALL biasd(xn,d, dir_name)
+3    continue
+     loop3: do while(1 == 1)
         xnw=xnp(d,xn)
-     end do
-
-     ynw=ynp(d,yn)
-     znw=znp(d,zn)
-
-     paw=a(xnw,ynw,znw)
-     pbw=b(xnw,ynw,znw)
-     patw=cr(d,paw,pbw)
-
-     kw=ket(xnw,ynw,znw)
-
-     IF (kw==nkt+1) THEN
-        IF (c==4) THEN
-           IF (ket(xa,ya,za)==nkt+1) THEN
+        do while ((xnw<1).OR.(xnw>nx)) 
+           call biasd(xn,d, dir_name)
+           xnw=xnp(d,xn)
+        end do
+        ynw=ynp(d,yn)
+        znw=znp(d,zn)
+        paw=a(xnw,ynw,znw)
+        pbw=b(xnw,ynw,znw)
+        patw=cr(d,paw,pbw)
+        kw=ket(xnw,ynw,znw)
+        patwblock: if (patw==1 .and. kw/=nkt+1) then
+           t=t+tu
+           tcount=tcount+1
+           if ((mod(tcount,value)==0).and.(tcount/=0)) then
+              value=value*1.30-modulo(value*1.30,1e0)
+              call chaindynamics(dir_name)
+              tcount=0
+           end if
+           call biasd(xn,d, dir_name)
+!!!go to 3
+        else
+           exit loop3
+        end if patwblock
+     end do loop3
+     kwblock: if (kw==nkt+1) then
+        cselect2: select case (c)
+        case(4)
+           if (ket(xa,ya,za)==nkt+1) then
               a(xb,yb,zb)=pp(db)
               b(xa,ya,za)=pp(da)
               ket(xa,ya,za)=k0   
-           ELSE
+           else
               a(xb,yb,zb)=pp(db)
               b(xa,ya,za)=pp(da)
               ket(xb,yb,zb)=k0
-           END IF
+           end if
 
-        ELSEIF (c==5) THEN
+        case(5)
            b(x,y,z)=pp(dcon)
            ket(x,y,z)=k0
 
@@ -230,38 +210,23 @@ program polymix
            yy(k0)=yn
            zz(k0)=zn
 
-        ELSEIF (c==6) THEN
+        case(6)
            a(x,y,z)=pp(dcon)
            ket(x,y,z)=k0
-        END IF
+        end select cselect2
 
         t=tmk
         tcount=tcountmk
         value=valuemk
+        cycle mcloop   
+     end if kwblock
 
-        cycle mcloop    !FIX delete this if ok: GO TO 2 
-
-     ELSEIF (patw==1) THEN
-        t=t+tu
-        tcount=tcount+1
-
-        IF ((mod(tcount,value)==0).AND.(tcount/=0)) THEN
-           value=value*1.30-modulo(value*1.30,1E0)
-           CALL chaindynamics(dir_name)
-           tcount=0
-        END IF
-
-        CALL biasd(xn,d, dir_name)
-
-        GO TO 3
-     END IF
-
-     CALL vel(xn,yn,zn,pp(dcon),dir_name)
+     call vel(xn,yn,zn,pp(dcon),dir_name)
 
      !Recall e is the loop condition 
 
      !FIX this is a huge loop. Reorganizing into parts/subroutines would be good
-     eloop: DO WHILE (e/=1)
+     eloop: do while (e/=1)
         x=xn
         y=yn
         z=zn
@@ -280,43 +245,32 @@ program polymix
         !Simply put, if the TV tries to step out of the box, try again
         !Since this isn't one of the "Monte Carlo Moves" time is not incremented
         
-1       IF((xn<1).OR.(xn>nx)) THEN
-           CALL biasd(x,d,dir_name)
+        xnloop: do while((xn<1).or.(xn>nx))
+           call biasd(x,d,dir_name)
            xn=xnp(d,x)
-           GO TO 1
-        END IF
+        end do xnloop
 
         !If walls were set up in other directions in MODLAY, include IF-THEN blocks
         !equivalent to the above block for x
-
         yn=ynp(d,y)
         zn=znp(d,z)
 
         !Find the bond directional codes (a,b) at the new point.
-
         pa=a(xn,yn,zn)
         pb=b(xn,yn,zn)
 
         !Look in the data structure cr(d,a,b) to determine situational code.
         !The cr data structure contains every possible combination of d, pa, and pb.
-
         pat=cr(d,pa,pb)
 
-
         !Set k equal to the chain number at the new point.
-
         k=ket(xn,yn,zn)
 
         !If the move is possible, call the velocity routine. 
-
-        IF (pat/=1) THEN
-           CALL vel(xn,yn,zn,d,dir_name)
-        END IF
+        if (pat/=1) call vel(xn,yn,zn,d,dir_name)
 
         !START OF THE MC MOVES
-
         !Time increments are added only upon entry of the tv into a new chain.
-
         !If the tv stays within the same chain, time is not incremented.
         !Sections of a chain which can move are "movable groups"; time is incremented
         !when a movable group is moved, not when each segment is moved.
@@ -335,7 +289,7 @@ program polymix
 
         patselect: select case (pat)
         case (1)
-           CALL biasd(x,d,dir_name)
+           call biasd(x,d,dir_name)
            xn=x
            yn=y
            zn=z
@@ -344,30 +298,30 @@ program polymix
            tcount=tcount+1
 
            !pat=2 represents a move along the chain in a-direction.
-           !Set the direction of the d code coincident with a.
-           !Time is not incremented because this is a continuation movement;
+           !set the direction of the d code coincident with a.
+           !time is not incremented because this is a continuation movement;
            !it is part of the movement of a movable group.  
 
         case(2)
            d=pa
-           IF (k>nkt) THEN
+           if (k>nkt) then
               ket(xn,yn,zn)=k0
               e=1
-           END IF
+           end if
 
            !pat=3 represents a move along the chain in b-direction
-           !Set the direction of the d code coincident with b.
+           !set the direction of the d code coincident with b.
 
         case(3)
            d=pb
-           IF (k>nkt) THEN
+           if (k>nkt) then
               ket(xn,yn,zn)=k0
               e=1
-           END IF
+           end if
 
            !pat=4 represents entry into a new chain at b=13 end.
-           !Set the directional code coincident with the a-direction.
-           !Time is incremented because a new movable group is going to move.
+           !set the directional code coincident with the a-direction.
+           !time is incremented because a new movable group is going to move.
 
         case(4)
            a(x,y,z)=d
@@ -395,9 +349,9 @@ program polymix
            tcount=tcount+1
 
            !pat=5 represents entry into a new chain at a=13 end
-           !Set the directional code coincident with the b-direction.
-           !Time is incremented because a new movable group is going to move.
-           !Same logic as with b=13 but since this represents the chain end
+           !set the directional code coincident with the b-direction.
+           !time is incremented because a new movable group is going to move.
+           !same logic as with b=13 but since this represents the chain end
            !xx,yy,zz do not need to be updated
 
         case(5)
@@ -405,11 +359,11 @@ program polymix
            a(x,y,z)=13
            a(xn,yn,zn)=pp(d)
 
-           IF (k>nkt) THEN
+           if (k>nkt) then
               ket(xn,yn,zn)=k0
               e=1
               k=k0
-           END IF
+           end if
 
            ket(x,y,z)=k
 
@@ -419,8 +373,8 @@ program polymix
            tcount=tcount+1
 
            !pat=6 represents leaving a chain at the b=13 end.
-           !Generate a new "random" directional code.
-           !Time is not incremented because this is a continuation movement;
+           !generate a new "random" directional code.
+           !time is not incremented because this is a continuation movement;
            !it completes the movement of a movable group.
 
         case(6)
@@ -458,8 +412,8 @@ program polymix
            end if
 
            !pat=8 represents rotation of a b=13 end.
-           !Generate a new "random" directional code.
-           !The chain end flip comprises a movable group move so time is incremented
+           !generate a new "random" directional code.
+           !the chain end flip comprises a movable group move so time is incremented
 
         case(8)
            can=cn(d,pa)
@@ -513,16 +467,16 @@ program polymix
 
            ket(x,y,z)=k
 
-           CALL biasd(xn,d,dir_name)
+           call biasd(xn,d,dir_name)
 
            t=t+tu
            tcount=tcount+1
 
            !pat=10 represents entry into a chain at a "kink" (bond angle of 60 degree)
-           !in the b-direction. Chain bonds and the tv lie in the same plane.
-           !Set the direction code to be coincident with the b code at the kink.
-           !Time is incremented because a new movable group is going to move.
-           !The TV is also going to actually enter the chain and move along it or
+           !in the b-direction. chain bonds and the tv lie in the same plane.
+           !set the direction code to be coincident with the b code at the kink.
+           !time is incremented because a new movable group is going to move.
+           !the tv is also going to actually enter the chain and move along it or
            !reverse its step and leave the chain right away.
 
         case(10)
@@ -538,11 +492,11 @@ program polymix
 
            a(xn,yn,zn)=pp(d)
 
-           IF (k>nkt) THEN
+           if (k>nkt) then
               ket(xn,yn,zn)=k0
               k=k0
               e=1
-           END IF
+           end if
 
            ket(x,y,z)=k
 
@@ -566,11 +520,11 @@ program polymix
 
            b(xn,yn,zn)=pp(d)
 
-           IF (k>nkt) THEN
+           if (k>nkt) then
               ket(xn,yn,zn)=k0
               k=k0
               e=1
-           END IF
+           end if
 
            ket(x,y,z)=k
 
@@ -581,11 +535,11 @@ program polymix
 
 
            !pat=12 represents two-bond rotation.
-           !Generate a new "random" directional code.
-           !This "crankshaft" type move moves a movable group so time is incremented
-           !This move requires us to complete the triangle twice from the a and b
+           !generate a new "random" directional code.
+           !this "crankshaft" type move moves a movable group so time is incremented
+           !this move requires us to complete the triangle twice from the a and b
            !side because it needs bonds from the other
-           !two beads. The TV does not enter the chain
+           !two beads. the tv does not enter the chain
         case(12)
            can=cn(d,pa)
            a(x,y,z)=can
@@ -606,23 +560,23 @@ program polymix
            a(xb,yb,zb)=pp(cbn)
            ket(x,y,z)=k
 
-           CALL biasd(xn,d,dir_name)
+           call biasd(xn,d,dir_name)
 
            t=t+tu
            tcount=tcount+1
 
            !pat=13 represents leaving a chain at a kink in the a-direction
-           !Generate a new "random" directional code.
-           !Time is not incremented because this is a continuation movement;
+           !generate a new "random" directional code.
+           !time is not incremented because this is a continuation movement;
            !it completes the movement of a movable group.
-           !This move is the opposite of entering at the kink.
+           !this move is the opposite of entering at the kink.
 
         case(13)
-           IF (k>nkt)THEN
+           if (k>nkt)then
               ket(xn,yn,zn)=k0
               k=k0
               e=1
-           Else
+           else
               can=cn(d,pa)
               a(x,y,z)=can
 
@@ -632,17 +586,17 @@ program polymix
 
               b(xa,ya,za)=pp(can)
 
-              CALL biasd(xn,d,dir_name)
-           END IF
+              call biasd(xn,d,dir_name)
+           end if
 
            !pat=14 represents leaving a chain at a kink in b-direction
 
         case(14)
-           IF (k>nkt)THEN
+           if (k>nkt)then
               ket(xn,yn,zn)=k0
               k=k0
               e=1
-           ELSE
+           else
               cbn=cn(d,pb)
               b(x,y,z)=cbn
 
@@ -652,12 +606,12 @@ program polymix
 
               a(xb,yb,zb)=pp(cbn)
 
-              CALL biasd(xn,d,dir_name)
-           END IF
+              call biasd(xn,d,dir_name)
+           end if
 
 
            !pat=15 represents motion of a solvent bead
-           !Generate a new "random" directional code.
+           !generate a new "random" directional code.
 
         case(15)
            a(x,y,z)=13
@@ -669,7 +623,7 @@ program polymix
 
            ket(x,y,z)=k
 
-           CALL biasd(xn,d,dir_name)
+           call biasd(xn,d,dir_name)
 
            t=t+tu
            tcount=tcount+1             
@@ -682,25 +636,21 @@ program polymix
         end if
      end do eloop
 
-
      l=l+1
-
-     CALL chaincalcs(dir_name)
-
-     CALL boxcalcs(dir_name)
+     call chaincalcs(dir_name)
+     call boxcalcs(dir_name)
 
      !Bipolar shear flow update
-     IF (l >= Nequil) THEN
-
-        !Update bipolar shear flow
+     if (l >= nequil) then
+        !update bipolar shear flow
 
         !FIX can we delete this?
-        !  DO x=1,nx
-        !   xdiv=real(x,kind=pm_dbl)/real(nx+1,kind=pm_dbl)-0.5D0
-        !   ppy(x)=pzero*(1.D0+pnew*xdiv)
-        !   pmy(x)=pzero*(1.D0-pnew*xdiv)
+        !  do x=1,nx
+        !   xdiv=real(x,kind=pm_dbl)/real(nx+1,kind=pm_dbl)-0.5d0
+        !   ppy(x)=pzero*(1.d0+pnew*xdiv)
+        !   pmy(x)=pzero*(1.d0-pnew*xdiv)
         !   pxz(x)=pzero
-        !  END DO
+        !  end do
 
         do x=1,nx
            xdiv=real(x-1,kind=pm_dbl)/real(nx-1,kind=pm_dbl)
@@ -711,18 +661,19 @@ program polymix
         call autocorrelate(dir_name)
      end if
 
-     !Output the undated model
+     !output the undated model
      if (mod(l,maxsta)==0) call write_updated_model
 
   end do mcloop
 
-  ! Final subroutine call
-  CALL vel(xn,yn,zn,d, dir_name)
+  ! final subroutine call
+  call vel(xn,yn,zn,d, dir_name)
 
-  CALL chaindynamics(dir_name)
+  call chaindynamics(dir_name)
 
-  PRINT *,'Preparing to write out model file to disk for the final time'
+  write(outu,fmta)'Write out model file to disk for the final time'
   call write_final_model
+  stop
 
   !==========================================================================
   ! contained subroutines
@@ -744,9 +695,54 @@ contains
   end subroutine init_vars_1
 
   !==========================================================================
+  ! init_vars_2
+  !==========================================================================
+  subroutine init_vars_2
+
+    write(outu,fmta)'data.in,conf.in and model.bin file read in'
+    !Define fundamental time step
+    tu=2.D0/(real(nx,kind=pm_dbl)*real(ny,kind=pm_dbl)*real(nz,kind=pm_dbl))
+
+    allocate (ppy(nx),pmy(nx),pxz(nx))
+
+    !=========================================================================
+    !FIX -- can we delete this stuff?
+    !FIX -- looks like an alternative way to run the program
+    !FIX -- Should be made into actual code with an input parameter to turn it on
+    !
+    !PRINT *, 'Assigning biasing value. pmax=', pmax
+    !!Assign the initial biasing to generate the bipolar shear flow
+    !DO x=1,nx
+    ! xdiv=real(x,kind=pm_dbl)/real(nx+1,kind=pm_dbl)-0.5D0
+    ! ppy(x)=pzero*(1.D0+pmax*xdiv)
+    ! pmy(x)=pzero*(1.D0-pmax*xdiv)
+    ! pxz(x)=pzero
+    !END DO
+    !=========================================================================
+
+
+    write(outu,'("PM> ",a,2x,g15.5)') 'Assigning biasing value. pmax=', pmax
+    !Assign the initial biasing to generate the bipolar parabolic flow
+    do x=1,nx
+       xdiv=real(x-1,kind=pm_dbl)/real(nx-1,kind=pm_dbl)
+       ppy(x)=pzero-pmax*(xdiv-xdiv*xdiv)
+       pmy(x)=pzero+pmax*(xdiv-xdiv*xdiv)
+       pxz(x)=pzero
+    end do
+
+    write(outu,fmta)'bipolar velocity profile assigned'
+
+    !Assign the initial xd,yd,and zd array value
+    xd(1:nkt)=xx(1:nkt)
+    yd(1:nkt)=yy(1:nkt)
+    zd(1:nkt)=zz(1:nkt)
+    return
+  end subroutine init_vars_2
+
+  !==========================================================================
   ! read_infile
   !==========================================================================
- subroutine read_infile
+  subroutine read_infile
     open (unit=14,file='data.in',status='old')
     read (14,*) infile
     read (14,*) outfile
@@ -875,34 +871,34 @@ contains
   ! write_updated_model
   !==========================================================================
   subroutine write_updated_model
-    character(len=40) :: fmt100="(1024(I8))"
-    PRINT *,'Writing model file to disk after every maxsta loops'
-    PRINT *,'Total loops of:',l,'MC time:',t
-    OPEN(unit=21, file=outfile, status='unknown')
+    character(len=40) :: fmt100="(1024(i8))"
+    write(outu,fmta)'writing model file to disk after every maxsta loops'
+    write(outu,'("PM> ",a,i8,a,g20.5)')'total loops of :',l,'mc time: ',t
+    open(unit=21, file=outfile, status='unknown')
 
-    !Write the box dimensions and total chain number
-    WRITE (21,fmt100) nx, ny, nz, nkt
+    !write the box dimensions and total chain number
+    write (21,fmt100) nx, ny, nz, nkt
 
-    !Write the chain lengths and chain numbers
-    WRITE (21,fmt100) nw1, nw2, nw3, nw4, nw5, nw6, nw7, nw8
-    WRITE (21,fmt100) nk1, nk2, nk3, nk4, nk5, nk6, nk7, nk8
+    !write the chain lengths and chain numbers
+    write (21,fmt100) nw1, nw2, nw3, nw4, nw5, nw6, nw7, nw8
+    write (21,fmt100) nk1, nk2, nk3, nk4, nk5, nk6, nk7, nk8
 
-    !Write the pointers that map new points
-    Do d=1,12
-       WRITE (21,fmt100) (xnp(d,i),i=1,nx)
-       WRITE (21,fmt100) (ynp(d,i),i=1,ny)
-       WRITE (21,fmt100) (znp(d,i),i=1,nz)
-    END DO
+    !write the pointers that map new points
+    do d=1,12
+       write (21,fmt100) (xnp(d,i),i=1,nx)
+       write (21,fmt100) (ynp(d,i),i=1,ny)
+       write (21,fmt100) (znp(d,i),i=1,nz)
+    end do
 
-    !Write bond code and chain number for every site
-    WRITE (21,fmt100) (((i,j,k,a(i,j,k),b(i,j,k),ket(i,j,k),k=-1,nz),j=1,ny),i=1,nx)
+    !write bond code and chain number for every site
+    write (21,fmt100) (((i,j,k,a(i,j,k),b(i,j,k),ket(i,j,k),k=1,nz),j=1,ny),i=1,nx)
 
-    !Write the first monomer position of each chain and the corresponding chain length.
-    DO i=1,nkt
-       WRITE (21,fmt100) xx(i),yy(i),zz(i),nw(i)
-    END DO
-    CLOSE(unit=21)
-  END subroutine write_updated_model
+    !write the first monomer position of each chain and the corresponding chain length.
+    do i=1,nkt
+       write (21,fmt100) xx(i),yy(i),zz(i),nw(i)
+    end do
+    close(unit=21)
+  end subroutine write_updated_model
 
 end program polymix
 
