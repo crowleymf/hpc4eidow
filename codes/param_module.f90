@@ -2,12 +2,7 @@ module param
 
   use pmtypes
 
-  !====== PARAMETERS =============
-  integer,parameter :: outu=6
-  real(kind=pm_dbl),parameter :: zero=0., one=1., two=2., three=3.
-  real(kind=pm_dbl),parameter :: half=0.5, third=1._pm_dbl/3._pm_dbl
-  real(kind=pm_dbl),parameter :: isqrt2 = one/sqrt(two)  
-
+  integer :: outu=6
 
   !Box sizes
   integer :: nx, ny, nz, nkt

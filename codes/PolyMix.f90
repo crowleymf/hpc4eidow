@@ -9,7 +9,6 @@ program polymix
   use chaindyn, only: chaindynamics
   use chaincalc, only: chaincalcs
   use box_calcs, only: boxcalcs
-  use autocorr,only: autocorrelate
 
   implicit none
 
@@ -45,7 +44,7 @@ program polymix
 
   !Call subroutines for initialization
   call chaincalcs(dir_name)
-  call boxcalcs
+  call boxcalcs(dir_name)
   call chaindynamics(dir_name)
   call vel(xn,yn,zn,d, dir_name)
 
@@ -106,7 +105,7 @@ program polymix
         a(xb,yb,zb)=ba
         b(xa,ya,za)=pp(ba)
 
-        if (ran2(iseed)>half) then
+        if (ran2(iseed)>0.5d0) then
            ket(xa,ya,za)=k
            dcon=da
         else 
@@ -640,7 +639,7 @@ program polymix
 
      l=l+1
      call chaincalcs(dir_name)
-     call boxcalcs
+     call boxcalcs(dir_name)
 
      !Bipolar shear flow update
      if (l >= nequil) then
@@ -648,9 +647,9 @@ program polymix
 
         !FIX can we delete this?
         !  do x=1,nx
-        !   xdiv=real(x,kind=pm_dbl)/real(nx+1,kind=pm_dbl)-half
-        !   ppy(x)=pzero*(one+pnew*xdiv)
-        !   pmy(x)=pzero*(one-pnew*xdiv)
+        !   xdiv=real(x,kind=pm_dbl)/real(nx+1,kind=pm_dbl)-0.5d0
+        !   ppy(x)=pzero*(1.d0+pnew*xdiv)
+        !   pmy(x)=pzero*(1.d0-pnew*xdiv)
         !   pxz(x)=pzero
         !  end do
 
@@ -660,7 +659,7 @@ program polymix
            pmy(x)=pzero+pnew*(xdiv-xdiv*xdiv)
            pxz(x)=pzero
         end do
-        call autocorrelate
+        call autocorrelate(dir_name)
      end if
 
      !output the undated model
@@ -675,8 +674,6 @@ program polymix
 
   write(outu,fmta)'Write out model file to disk for the final time'
   call write_final_model
-  call pm_close_all_files
-
   stop
 
   !==========================================================================
@@ -690,9 +687,9 @@ contains
   subroutine init_vars_1
     value=10
     l=0
-    t=zero
+    t=0.D0
     d=0
-    pzero=third
+    pzero=1.D0/3.D0
     iseed=10
     !st=0
     !w=0
@@ -705,7 +702,7 @@ contains
 
     write(outu,fmta)'data.in,conf.in and model.bin file read in'
     !Define fundamental time step
-    tu=two/(real(nx,kind=pm_dbl)*real(ny,kind=pm_dbl)*real(nz,kind=pm_dbl))
+    tu=2.D0/(real(nx,kind=pm_dbl)*real(ny,kind=pm_dbl)*real(nz,kind=pm_dbl))
 
     allocate (ppy(nx),pmy(nx),pxz(nx))
 
@@ -717,9 +714,9 @@ contains
     !PRINT *, 'Assigning biasing value. pmax=', pmax
     !!Assign the initial biasing to generate the bipolar shear flow
     !DO x=1,nx
-    ! xdiv=real(x,kind=pm_dbl)/real(nx+1,kind=pm_dbl)-half
-    ! ppy(x)=pzero*(one+pmax*xdiv)
-    ! pmy(x)=pzero*(one-pmax*xdiv)
+    ! xdiv=real(x,kind=pm_dbl)/real(nx+1,kind=pm_dbl)-0.5D0
+    ! ppy(x)=pzero*(1.D0+pmax*xdiv)
+    ! pmy(x)=pzero*(1.D0-pmax*xdiv)
     ! pxz(x)=pzero
     !END DO
     !=========================================================================

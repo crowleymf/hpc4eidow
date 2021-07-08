@@ -77,15 +77,15 @@ module chaincalc
   real(kind=pm_dbl) chainfinal
   real(kind=pm_dbl) chaindev
 
-  character(len=100) :: fmt300="(3(a20,x))"
-  character(len=100) :: fmt301="(5(a20,x))"
-  character(len=100) :: fmt302="(7(a20,x))"
-  character(len=100) :: fmt303="(9(a20,x))"
-  character(len=100) :: fmt304="(i20,x,2(f20.14,x))"
-  character(len=100) :: fmt305="(i20,x,4(f20.14,x))"
-  character(len=100) :: fmt306="(i20,x,6(f20.14,x))"
-  character(len=100) :: fmt307="(i20,x,8(f20.14,x))"
-  character(len=100) :: fmt308="(8(a20,x))"
+  character(len=100) :: fmt300="(3(A20,x))"
+  character(len=100) :: fmt301="(5(A20,x))"
+  character(len=100) :: fmt302="(7(A20,x))"
+  character(len=100) :: fmt303="(9(A20,x))"
+  character(len=100) :: fmt304="(I20,x,2(f20.14,x))"
+  character(len=100) :: fmt305="(I20,x,4(f20.14,x))"
+  character(len=100) :: fmt306="(I20,x,6(f20.14,x))"
+  character(len=100) :: fmt307="(I20,x,8(f20.14,x))"
+  character(len=100) :: fmt308="(8(A20,x))"
 
 contains
   subroutine chaincalcs(dir_name)
@@ -94,7 +94,7 @@ contains
     use param
     implicit none
     character(len=*) :: dir_name
-    
+
     dir_name = trim(adjustl(dir_name))
 
     !initialization
@@ -142,21 +142,21 @@ contains
 
     !averaging after maxdyn loops
     if (mod(l,maxdyn)==0 .and. l /= 0) then
-       eteboxsum = zero
-       rogboxsum = zero
+       eteboxsum = 0.D0
+       rogboxsum = 0.D0
 
-       eteboxsumdev=zero
-       rogboxsumdev=zero
+       eteboxsumdev=0.D0
+       rogboxsumdev=0.D0
 
-       allocate (etebinsum(nx), rogbinsum(nx))
-       allocate (etebinsumdev(nx), rogbinsumdev(nx))
+       ALLOCATE (etebinsum(nx), rogbinsum(nx))
+       ALLOCATE (etebinsumdev(nx), rogbinsumdev(nx))
 
-       do x = 1, nx
-          etebinsum(x) = zero
-          rogbinsum(x) = zero
+       DO x = 1, nx
+          etebinsum(x) = 0.D0
+          rogbinsum(x) = 0.D0
 
-          etebinsumdev(x)=zero
-          rogbinsumdev(x)=zero
+          etebinsumdev(x)=0.D0
+          rogbinsumdev(x)=0.D0
        enddo
 
        rewind (30)
@@ -183,10 +183,10 @@ contains
           rogboxsumdev = rogboxsumdev + (rogboxtemp-rogboxsum/denom)**2
        end do
        etefinal = eteboxsum/denom
-       etedev = sqrt(eteboxsumdev/(denom-one))
+       etedev = sqrt(eteboxsumdev/(denom-1.d0))
 
        rogfinal = rogboxsum/denom
-       rogdev = sqrt(rogboxsumdev/(denom-one))
+       rogdev = sqrt(rogboxsumdev/(denom-1.d0))
 
        write(40,fmt306) l, etefinal, etedev, rogfinal, rogdev, maxete, t
 
@@ -215,25 +215,25 @@ contains
 
        deallocate (etebinsum, rogbinsum)
        deallocate (etebinsumdev, rogbinsumdev)
-    endif
-    !averaging after maxsta loops
-    if (mod(l, maxsta) == 0 .and. l /= 0) then
+    ENDIF
+    !Averaging after maxsta loops
+    IF (mod(l, maxsta) == 0 .AND. l /= 0) THEN
        call zero_average_init
 
-       rewind (31)
-       rewind (33)
-       rewind (34)
-       rewind (35)
+       REWIND (31)
+       REWIND (33)
+       REWIND (34)
+       REWIND (35)
 
-       do loop = 1, maxsta
+       DO loop = 1, maxsta
           call maxsta_avg_calc
-       enddo
+       ENDDO
 
        denom = real(maxsta,kind=pm_dbl)
 
-       rewind(31)
-       do loop=1,maxsta
-          read(31) eteboxtemp, eteparaboxtemp, eteperpboxtemp, rogboxtemp, thetaxboxtemp, thetayboxtemp, thetazboxtemp
+       REWIND(31)
+       DO loop=1,maxsta
+          READ(31) eteboxtemp, eteparaboxtemp, eteperpboxtemp, rogboxtemp, thetaxboxtemp, thetayboxtemp, thetazboxtemp
           eteboxsumdev=eteboxsumdev+(eteboxtemp-eteboxsum/denom)**2
           eteparaboxsumdev=eteparaboxsumdev+(eteparaboxtemp-eteparaboxsum/denom)**2
           eteperpboxsumdev=eteperpboxsumdev+(eteperpboxtemp-eteperpboxsum/denom)**2
@@ -241,25 +241,25 @@ contains
           thetaxsumdev=thetaxsumdev+(thetaxboxtemp-thetaxsum/denom)**2
           thetaysumdev=thetaysumdev+(thetayboxtemp-thetaysum/denom)**2
           thetazsumdev=thetazsumdev+(thetazboxtemp-thetazsum/denom)**2
-       end do
+       END DO
        etefinal = eteboxsum/denom
        eteparafinal = eteparaboxsum/denom
        eteperpfinal = eteperpboxsum/denom
 
-       etedev = sqrt(eteboxsumdev/(denom-one))
-       eteparadev=sqrt(eteparaboxsumdev/(denom-one))
-       eteperpdev=sqrt(eteperpboxsumdev/(denom-one))
+       etedev = sqrt(eteboxsumdev/(denom-1.D0))
+       eteparadev=sqrt(eteparaboxsumdev/(denom-1.D0))
+       eteperpdev=sqrt(eteperpboxsumdev/(denom-1.D0))
 
        rogfinal = rogboxsum/denom
-       rogdev = sqrt(rogboxsumdev/(denom-one))
+       rogdev = sqrt(rogboxsumdev/(denom-1.D0))
 
        thetaxfinal = thetaxsum/denom
        thetayfinal = thetaysum/denom
        thetazfinal = thetazsum/denom
 
-       thetaxdev = sqrt(thetaxsumdev/(denom-one))
-       thetaydev = sqrt(thetaysumdev/(denom-one))
-       thetazdev = sqrt(thetazsumdev/(denom-one))
+       thetaxdev = sqrt(thetaxsumdev/(denom-1.D0))
+       thetaydev = sqrt(thetaysumdev/(denom-1.D0))
+       thetazdev = sqrt(thetazsumdev/(denom-1.D0))
 
        write(41,fmt307) l, etefinal, etedev, eteparafinal, eteparadev, eteperpfinal, eteperpdev, rogfinal, rogdev
 
@@ -289,28 +289,28 @@ contains
              rogbinsumdev(point) = rogbinsumdev(point) + (rogbintemp-rogbinsum(point)/denom)**2
              chainsumdev(point) = chainsumdev(point) + (chainbintemp-chainsum(point)/denom)**2
 
-             read(35) point, thetaxbintemp, thetaybintemp, thetazbintemp
+             READ(35) point, thetaxbintemp, thetaybintemp, thetazbintemp
              thetaxbinsumdev(point) = thetaxbinsumdev(point) + (thetaxbintemp-thetaxbinsum(point)/denom)**2
              thetaybinsumdev(point) = thetaybinsumdev(point) + (thetaybintemp-thetaybinsum(point)/denom)**2
              thetazbinsumdev(point) = thetazbinsumdev(point) + (thetazbintemp-thetazbinsum(point)/denom)**2
-          end do
-       end do
+          END DO
+       END DO
 
-       do x = 1, nx
+       DO x = 1, nx
           chainfinal = chainsum(x)/denom
-          chaindev = sqrt(chainsumdev(x)/(denom-one))
-          write(44,fmt304) x, chainfinal, chaindev
+          chaindev = sqrt(chainsumdev(x)/(denom-1.D0))
+          WRITE(44,fmt304) x, chainfinal, chaindev
 
           etebinfinal = etebinsum(x)/denom
           rogbinfinal = rogbinsum(x)/denom
           eteparabinfinal = eteparabinsum(x)/denom
           eteperpbinfinal = eteperpbinsum(x)/denom
 
-          etebindev = sqrt(etebinsumdev(x)/(denom-one))
-          eteparabindev = sqrt(eteparabinsumdev(x)/(denom-one))
-          eteperpbindev = sqrt(eteperpbinsumdev(x)/(denom-one))
-          rogbindev = sqrt(rogbinsumdev(x)/(denom-one))
-          write(45,fmt307) x, etebinfinal, etebindev, eteparabinfinal, &
+          etebindev = sqrt(etebinsumdev(x)/(denom-1.D0))
+          eteparabindev = sqrt(eteparabinsumdev(x)/(denom-1.D0))
+          eteperpbindev = sqrt(eteperpbinsumdev(x)/(denom-1.D0))
+          rogbindev = sqrt(rogbinsumdev(x)/(denom-1.D0))
+          WRITE(45,fmt307) x, etebinfinal, etebindev, eteparabinfinal, &
                eteparabindev, eteperpbinfinal, eteperpbindev, &
                rogbinfinal, rogbindev
 
@@ -322,63 +322,63 @@ contains
           nk6 = nk6sum(x)/denom
           nk7 = nk7sum(x)/denom
           nk8 = nk8sum(x)/denom
-          write(46,fmt308) x, nk1, nk2, nk3, nk4, nk5, nk6, nk7, nk8
+          WRITE(46,fmt308) x, nk1, nk2, nk3, nk4, nk5, nk6, nk7, nk8
 
           thetaxbinfinal = thetaxbinsum(x)/denom
           thetaybinfinal = thetaybinsum(x)/denom
           thetazbinfinal = thetazbinsum(x)/denom
 
-          thetaxbindev = sqrt(thetaxbinsumdev(x)/(denom-one))
-          thetaybindev = sqrt(thetaybinsumdev(x)/(denom-one))
-          thetazbindev = sqrt(thetazbinsumdev(x)/(denom-one))
-          write(47,fmt306) x, thetaxbinfinal, thetaxbindev, thetaybinfinal, thetaybindev, thetazbinfinal, thetazbindev
+          thetaxbindev = sqrt(thetaxbinsumdev(x)/(denom-1.D0))
+          thetaybindev = sqrt(thetaybinsumdev(x)/(denom-1.D0))
+          thetazbindev = sqrt(thetazbinsumdev(x)/(denom-1.D0))
+          WRITE(47,fmt306) x, thetaxbinfinal, thetaxbindev, thetaybinfinal, thetaybindev, thetazbinfinal, thetazbindev
 
-       enddo
+       ENDDO
 
-       rewind(31)
-       rewind(33)
-       rewind(34)
-       rewind(35)
+       REWIND(31)
+       REWIND(33)
+       REWIND(34)
+       REWIND(35)
 
-       close (unit = 44)
-       close (unit = 45)
-       close (unit = 46)
-       close (unit = 47)
+       CLOSE (unit = 44)
+       CLOSE (unit = 45)
+       CLOSE (unit = 46)
+       CLOSE (unit = 47)
 
-       deallocate (etebinsum, eteparabinsum, eteperpbinsum, rogbinsum, chainsum)
-       deallocate (etebinsumdev, eteparabinsumdev, eteperpbinsumdev, rogbinsumdev, chainsumdev)
-       deallocate (nk1sum, nk2sum, nk3sum, nk4sum, nk5sum, nk6sum, nk7sum, nk8sum)
-       deallocate (thetaxbinsum, thetaybinsum, thetazbinsum)
-       deallocate (thetaxbinsumdev, thetaybinsumdev, thetazbinsumdev)
+       DEALLOCATE (etebinsum, eteparabinsum, eteperpbinsum, rogbinsum, chainsum)
+       DEALLOCATE (etebinsumdev, eteparabinsumdev, eteperpbinsumdev, rogbinsumdev, chainsumdev)
+       DEALLOCATE (nk1sum, nk2sum, nk3sum, nk4sum, nk5sum, nk6sum, nk7sum, nk8sum)
+       DEALLOCATE (thetaxbinsum, thetaybinsum, thetazbinsum)
+       DEALLOCATE (thetaxbinsumdev, thetaybinsumdev, thetazbinsumdev)
 
-    endif
+    ENDIF
 
     call cleanup
 
 
   contains
     subroutine initalize
-      eteboxtot = zero
-      eteparatot = zero
-      eteperptot = zero
+      eteboxtot = 0.D0
+      eteparatot = 0.D0
+      eteperptot = 0.D0
 
-      rogtot = zero
+      rogtot = 0.D0
 
-      thetaxtot = zero
-      thetaytot = zero
-      thetaztot = zero
+      thetaxtot = 0.D0
+      thetaytot = 0.D0
+      thetaztot = 0.D0
 
-      do x  = 1, nx
+      DO x  = 1, nx
          chainend(x) = 0
-         etebintot(x) = zero
-         eteparabintot(x) = zero
-         eteperpbintot(x) = zero
+         etebintot(x) = 0.D0
+         eteparabintot(x) = 0.D0
+         eteperpbintot(x) = 0.D0
 
-         rogbintot(x) = zero
+         rogbintot(x) = 0.D0
 
-         thetaxbintot(x) = zero
-         thetaybintot(x) = zero
-         thetazbintot(x) = zero
+         thetaxbintot(x) = 0.D0
+         thetaybintot(x) = 0.D0
+         thetazbintot(x) = 0.D0
 
          bin(x) = 0
          bincount(x) = 0
@@ -391,101 +391,101 @@ contains
          binnk6(x) = 0
          binnk7(x) = 0
          binnk8(x) = 0
-      enddo
+      ENDDO
     end subroutine initalize
 
     subroutine zero_average_init
-      eteboxsum = zero
-      eteparaboxsum = zero
-      eteperpboxsum = zero
+      eteboxsum = 0.D0
+      eteparaboxsum = 0.D0
+      eteperpboxsum = 0.D0
 
-      eteboxsumdev = zero
-      eteparaboxsumdev = zero
-      eteperpboxsumdev = zero
+      eteboxsumdev = 0.D0
+      eteparaboxsumdev = 0.D0
+      eteperpboxsumdev = 0.D0
 
-      rogboxsum = zero
-      rogboxsumdev = zero
+      rogboxsum = 0.D0
+      rogboxsumdev = 0.D0
 
-      thetaxsum = zero
-      thetaysum = zero
-      thetazsum = zero
+      thetaxsum = 0.D0
+      thetaysum = 0.D0
+      thetazsum = 0.D0
 
-      thetaxsumdev = zero
-      thetaysumdev = zero
-      thetazsumdev = zero
+      thetaxsumdev = 0.D0
+      thetaysumdev = 0.D0
+      thetazsumdev = 0.D0
 
-      allocate (etebinsum(nx), eteparabinsum(nx), eteperpbinsum(nx), rogbinsum(nx), chainsum(nx))
-      allocate (etebinsumdev(nx), eteparabinsumdev(nx), eteperpbinsumdev(nx),rogbinsumdev(nx),chainsumdev(nx))
-      allocate (nk1sum(nx), nk2sum(nx), nk3sum(nx), nk4sum(nx), nk5sum(nx), nk6sum(nx), nk7sum(nx), nk8sum(nx))
-      allocate (thetaxbinsum(nx), thetaybinsum(nx), thetazbinsum(nx))
-      allocate (thetaxbinsumdev(nx), thetaybinsumdev(nx), thetazbinsumdev(nx))
+      ALLOCATE (etebinsum(nx), eteparabinsum(nx), eteperpbinsum(nx), rogbinsum(nx), chainsum(nx))
+      ALLOCATE (etebinsumdev(nx), eteparabinsumdev(nx), eteperpbinsumdev(nx),rogbinsumdev(nx),chainsumdev(nx))
+      ALLOCATE (nk1sum(nx), nk2sum(nx), nk3sum(nx), nk4sum(nx), nk5sum(nx), nk6sum(nx), nk7sum(nx), nk8sum(nx))
+      ALLOCATE (thetaxbinsum(nx), thetaybinsum(nx), thetazbinsum(nx))
+      ALLOCATE (thetaxbinsumdev(nx), thetaybinsumdev(nx), thetazbinsumdev(nx))
 
-      do x = 1, nx
-         etebinsum(x) = zero
-         eteparabinsum(x) = zero
-         eteperpbinsum(x) = zero
+      DO x = 1, nx
+         etebinsum(x) = 0.D0
+         eteparabinsum(x) = 0.D0
+         eteperpbinsum(x) = 0.D0
 
-         rogbinsum(x) = zero
+         rogbinsum(x) = 0.D0
 
-         chainsum(x) = zero
+         chainsum(x) = 0.D0
 
-         etebinsumdev(x) = zero
-         eteparabinsumdev(x) = zero
-         eteperpbinsumdev(x) = zero
+         etebinsumdev(x) = 0.D0
+         eteparabinsumdev(x) = 0.D0
+         eteperpbinsumdev(x) = 0.D0
 
-         rogbinsumdev(x) = zero
+         rogbinsumdev(x) = 0.D0
 
-         chainsumdev(x) = zero
+         chainsumdev(x) = 0.D0
 
-         nk1sum(x) = zero
-         nk2sum(x) = zero
-         nk3sum(x) = zero
-         nk4sum(x) = zero
-         nk5sum(x) = zero
-         nk6sum(x) = zero
-         nk7sum(x) = zero
-         nk8sum(x) = zero
+         nk1sum(x) = 0.D0
+         nk2sum(x) = 0.D0
+         nk3sum(x) = 0.D0
+         nk4sum(x) = 0.D0
+         nk5sum(x) = 0.D0
+         nk6sum(x) = 0.D0
+         nk7sum(x) = 0.D0
+         nk8sum(x) = 0.D0
 
-         thetaxbinsum(x) = zero
-         thetaybinsum(x) = zero
-         thetazbinsum(x) = zero
+         thetaxbinsum(x) = 0.D0
+         thetaybinsum(x) = 0.D0
+         thetazbinsum(x) = 0.D0
 
-         thetaxbinsumdev(x) = zero
-         thetaybinsumdev(x) = zero
-         thetazbinsumdev(x) = zero
-      enddo
+         thetaxbinsumdev(x) = 0.D0
+         thetaybinsumdev(x) = 0.D0
+         thetazbinsumdev(x) = 0.D0
+      ENDDO
     end subroutine zero_average_init
 
     subroutine zero_bincount_init
-      etebin(x) = zero
-      eteparabin(x) = zero
-      eteperpbin(x) = zero
+      etebin(x) = 0.D0
+      eteparabin(x) = 0.D0
+      eteperpbin(x) = 0.D0
 
-      rogbin(x) = zero
+      rogbin(x) = 0.D0
 
-      thetaxbin(x) = zero
-      thetaybin(x) = zero
-      thetazbin(x) = zero
+      thetaxbin(x) = 0.D0
+      thetaybin(x) = 0.D0
+      thetazbin(x) = 0.D0
 
-      nk1avg(x) =  zero
-      nk2avg(x) =  zero
-      nk3avg(x) =  zero
-      nk4avg(x) =  zero
-      nk5avg(x) =  zero
-      nk6avg(x) =  zero
-      nk7avg(x) =  zero
-      nk8avg(x) =  zero
+      nk1avg(x) =  0.D0
+      nk2avg(x) =  0.D0
+      nk3avg(x) =  0.D0
+      nk4avg(x) =  0.D0
+      nk5avg(x) =  0.D0
+      nk6avg(x) =  0.D0
+      nk7avg(x) =  0.D0
+      nk8avg(x) =  0.D0
     end subroutine zero_bincount_init
 
     subroutine iteration_init
       x = xx(k)
       y = yy(k)
       z = zz(k)
-      !the dx, dy, dz are the components of the end-to-end vector
+      !The dx, dy, dz are the components of the end-to-end vector
       dx = 0
       dy = 0
       dz = 0
-      !the mv is for the center of mass
+      !The mv is for the center of mass
       dxmv = 0
       dymv = 0
       dzmv = 0
@@ -493,7 +493,7 @@ contains
       atemp = a(x,y,z)
 
       chainend(x) = chainend(x) + 1
-      do while (atemp /= 13)
+      DO WHILE (atemp /= 13)
          dx = dx + px(atemp)
          dy = dy + py(atemp)
          dz = dz + pz(atemp)
@@ -512,33 +512,33 @@ contains
 
          atemp = a(x,y,z)
 
-         if (atemp == 13) then
+         IF (atemp == 13) THEN
             chainend(x) = chainend(x) + 1
-         endif
-      enddo
+         ENDIF
+      ENDDO
     end subroutine iteration_init
 
     subroutine zero_bead
-      !single bead considerations
-      dxcom(k) = zero
-      dycom(k) = zero
-      dzcom(k) = zero
+      !Single bead considerations
+      dxcom(k) = 0.D0
+      dycom(k) = 0.D0
+      dzcom(k) = 0.D0
 
-      ete(k) = zero
-      etepara(k) = zero
-      eteperp(k) = zero
+      ete(k) = 0.D0
+      etepara(k) = 0.D0
+      eteperp(k) = 0.D0
 
-      thetax(k) = zero
-      thetay(k) = zero
-      thetaz(k) = zero
+      thetax(k) = 0.D0
+      thetay(k) = 0.D0
+      thetaz(k) = 0.D0
     end subroutine zero_bead
 
     subroutine box_average
-      !the box averages are number averages
-      !the totals are divided by nkt at the end
-      thetaxtot = thetaxtot + (three*thetax(k)*thetax(k) - one)*half
-      thetaytot = thetaytot + (three*thetay(k)*thetay(k) - one)*half
-      thetaztot = thetaztot + (three*thetaz(k)*thetaz(k) - one)*half
+      !The box averages are number averages
+      !The totals are divided by nkt at the end
+      thetaxtot = thetaxtot + (3.D0*thetax(k)*thetax(k) - 1.0D0)/2.D0
+      thetaytot = thetaytot + (3.D0*thetay(k)*thetay(k) - 1.0D0)/2.D0
+      thetaztot = thetaztot + (3.D0*thetaz(k)*thetaz(k) - 1.0D0)/2.D0
 
       eteboxtot = eteboxtot + ete(k)
       eteparatot = eteparatot + etepara(k)
@@ -548,23 +548,23 @@ contains
       bin(k) = bincheck
       bincount(bin(k)) = bincount(bin(k)) + 1
 
-      if (nw(k) == nw1) then
+      IF (nw(k) == nw1) THEN
          binnk1(bin(k)) = binnk1(bin(k)) + 1
-      elseif (nw(k) == nw2) then
+      ELSEIF (nw(k) == nw2) THEN
          binnk2(bin(k)) = binnk2(bin(k)) + 1
-      elseif (nw(k) == nw3) then
+      ELSEIF (nw(k) == nw3) THEN
          binnk3(bin(k)) = binnk3(bin(k)) + 1
-      elseif (nw(k) == nw4) then
+      ELSEIF (nw(k) == nw4) THEN
          binnk4(bin(k)) = binnk4(bin(k)) + 1
-      elseif (nw(k) == nw5) then
+      ELSEIF (nw(k) == nw5) THEN
          binnk5(bin(k)) = binnk5(bin(k)) + 1
-      elseif (nw(k) == nw6) then
+      ELSEIF (nw(k) == nw6) THEN
          binnk6(bin(k)) = binnk6(bin(k)) + 1
-      elseif (nw(k) == nw7) then
+      ELSEIF (nw(k) == nw7) THEN
          binnk7(bin(k)) = binnk7(bin(k)) + 1
-      elseif (nw(k) == nw8) then
+      ELSEIF (nw(k) == nw8) THEN
          binnk8(bin(k)) = binnk8(bin(k)) + 1
-      endif
+      ENDIF
     end subroutine box_average
 
     subroutine radii_of_gyration
@@ -592,7 +592,7 @@ contains
     subroutine calc_single_bead_data
       call zero_bead
 
-      if (nw(k) > 1) then
+      IF (nw(k) > 1) THEN
          dxcom(k) = real(dxmv,kind=pm_dbl)/real(nw(k),kind=pm_dbl)
          dycom(k) = real(dymv,kind=pm_dbl)/real(nw(k),kind=pm_dbl)
          dzcom(k) = real(dzmv,kind=pm_dbl)/real(nw(k),kind=pm_dbl)
@@ -608,8 +608,8 @@ contains
          thetay(k) = real(dy,kind=pm_dbl)/ete(k)
          thetaz(k) = real(dz,kind=pm_dbl)/ete(k)
          call box_average
-         !radii of gyration
-         !the center of mass used here is the distance to the first bead
+         !Radii of gyration
+         !The center of mass used here is the distance to the first bead
          dx = 0
          dy = 0
          dz = 0
@@ -622,9 +622,9 @@ contains
 
          atemp = a(x,y,z)
 
-         do while (atemp /= 13)
+         DO WHILE (atemp /= 13)
             call radii_of_gyration
-         enddo
+         ENDDO
 
          rogsq = rogsqtot/real(nw(k),kind=pm_dbl)
          rog(k) = sqrt(rogsq)
@@ -636,14 +636,14 @@ contains
 
          rogbintot(bin(k)) = rogbintot(bin(k)) + rog(k)
 
-         thetaxbintot(bin(k)) = thetaxbintot(bin(k)) + (three*thetax(k)*thetax(k) - one)*half
-         thetaybintot(bin(k)) = thetaybintot(bin(k)) + (three*thetay(k)*thetay(k) - one)*half
-         thetazbintot(bin(k)) = thetazbintot(bin(k)) + (three*thetaz(k)*thetaz(k) - one)*half
-      endif
+         thetaxbintot(bin(k)) = thetaxbintot(bin(k)) + (3.D0*thetax(k)*thetax(k) - 1.0D0)/2.D0
+         thetaybintot(bin(k)) = thetaybintot(bin(k)) + (3.D0*thetay(k)*thetay(k) - 1.0D0)/2.D0
+         thetazbintot(bin(k)) = thetazbintot(bin(k)) + (3.D0*thetaz(k)*thetaz(k) - 1.0D0)/2.D0
+      ENDIF
     end subroutine calc_single_bead_data
 
     subroutine calc_box_avg
-      !calcualte the box averages
+      !Calcualte the box averages
       denom = real(nkt,kind=pm_dbl)
 
       etebox = eteboxtot/denom
@@ -658,10 +658,10 @@ contains
     end subroutine calc_box_avg
 
     subroutine bin_avg
-      if (bincount(x) == 0) then
+      IF (bincount(x) == 0) THEN
          call zero_bincount_init
 
-      else
+      ELSE
          etebin(x) = etebintot(x)/denom
          eteparabin(x) = eteparabintot(x)/denom
          eteperpbin(x) = eteperpbintot(x)/denom
@@ -680,30 +680,30 @@ contains
          nk6avg(x) =  real(binnk6(x),kind=pm_dbl)
          nk7avg(x) =  real(binnk7(x),kind=pm_dbl)
          nk8avg(x) =  real(binnk8(x),kind=pm_dbl)
-      endif
+      ENDIF
     end subroutine bin_avg
 
     subroutine cleanup
-      !array deallocation
-      deallocate (dxcom, dycom, dzcom)
+      !Array deallocation
+      DEALLOCATE (dxcom, dycom, dzcom)
 
-      deallocate (chainend, rog)
+      DEALLOCATE (chainend, rog)
 
-      deallocate (bin, bincount)
-      deallocate (binnk1, binnk2, binnk3, binnk4, binnk5, binnk6, binnk7, binnk8)
-      deallocate (nk1avg, nk2avg, nk3avg, nk4avg, nk5avg, nk6avg, nk7avg, nk8avg)
+      DEALLOCATE (bin, bincount)
+      DEALLOCATE (binnk1, binnk2, binnk3, binnk4, binnk5, binnk6, binnk7, binnk8)
+      DEALLOCATE (nk1avg, nk2avg, nk3avg, nk4avg, nk5avg, nk6avg, nk7avg, nk8avg)
 
-      deallocate (etepara, eteperp)
-      deallocate (etebin, eteparabin, eteperpbin, rogbin)
-      deallocate (etebintot, eteparabintot, eteperpbintot)
+      DEALLOCATE (etepara, eteperp)
+      DEALLOCATE (etebin, eteparabin, eteperpbin, rogbin)
+      DEALLOCATE (etebintot, eteparabintot, eteperpbintot)
 
-      deallocate (thetax, thetay, thetaz)
-      deallocate (rogbintot, thetaxbintot, thetaybintot, thetazbintot)
-      deallocate (thetaxbin, thetaybin, thetazbin)
+      DEALLOCATE (thetax, thetay, thetaz)
+      DEALLOCATE (rogbintot, thetaxbintot, thetaybintot, thetazbintot)
+      DEALLOCATE (thetaxbin, thetaybin, thetazbin)
     end subroutine cleanup
 
     subroutine maxsta_avg_calc
-      read(31) eteboxtemp, eteparaboxtemp, eteperpboxtemp, rogboxtemp, thetaxboxtemp, thetayboxtemp, thetazboxtemp
+      READ(31) eteboxtemp, eteparaboxtemp, eteperpboxtemp, rogboxtemp, thetaxboxtemp, thetayboxtemp, thetazboxtemp
       eteboxsum = eteboxsum + eteboxtemp
       eteparaboxsum = eteparaboxsum + eteparaboxtemp
       eteperpboxsum = eteperpboxsum + eteperpboxtemp
@@ -714,8 +714,8 @@ contains
       thetaysum = thetaysum + thetayboxtemp
       thetazsum = thetazsum + thetazboxtemp
 
-      do x = 1, nx
-         read(33) point, etebintemp, eteparabintemp, eteperpbintemp, rogbintemp, chainbintemp
+      DO x = 1, nx
+         READ(33) point, etebintemp, eteparabintemp, eteperpbintemp, rogbintemp, chainbintemp
          etebinsum(point) = etebinsum(point) + etebintemp
          eteparabinsum(point) = eteparabinsum(point) + eteparabintemp
          eteperpbinsum(point) = eteperpbinsum(point) + eteperpbintemp
@@ -724,7 +724,7 @@ contains
 
          chainsum(point) = chainsum(point) + chainbintemp
 
-         read(34) point, nk1temp, nk2temp, nk3temp, nk4temp, nk5temp, nk6temp, nk7temp, nk8temp
+         READ(34) point, nk1temp, nk2temp, nk3temp, nk4temp, nk5temp, nk6temp, nk7temp, nk8temp
          nk1sum(point) = nk1sum(point) + nk1temp
          nk2sum(point) = nk2sum(point) + nk2temp
          nk3sum(point) = nk3sum(point) + nk3temp
@@ -734,7 +734,7 @@ contains
          nk7sum(point) = nk7sum(point) + nk7temp
          nk8sum(point) = nk8sum(point) + nk8temp
 
-         read(35) point, thetaxbintemp, thetaybintemp, thetazbintemp
+         READ(35) point, thetaxbintemp, thetaybintemp, thetazbintemp
          thetaxbinsum(point) = thetaxbinsum(point) + thetaxbintemp
          thetaybinsum(point) = thetaybinsum(point) + thetaybintemp
          thetazbinsum(point) = thetazbinsum(point) + thetazbintemp
@@ -742,14 +742,14 @@ contains
     end subroutine maxsta_avg_calc
 
 
-  end subroutine chaincalcs
+  END SUBROUTINE chaincalcs
 
   subroutine open_chaincalcs_files(dir_name)
     implicit none
     character(len=*) :: dir_name
 
     dir_name = trim(adjustl(dir_name))
-    !--- formatted files --------
+    !--- Formatted files --------
     open(unit = 40, file=dir_name//'etedynamicbox.dat', form = 'formatted')
     open(unit = 41, file=dir_name//'chainproperties.dat', form = 'formatted')
     open(unit = 42, file=dir_name//'etedynamicbin.dat', form = 'formatted')
@@ -768,6 +768,27 @@ contains
     open(unit = 35, file=dir_name//'tmporderbin.tmp', form = 'unformatted')
     return
   end subroutine open_chaincalcs_files
+
+  subroutine close_chaincalcs_files
+    !--- Formatted files --------
+    close(unit = 40)
+    close(unit = 41)
+    close(unit = 42)
+    close(unit = 43)
+    close(unit = 44)
+    close(unit = 45)
+    close(unit = 46)
+    close(unit = 47)
+
+    !--- Unformatted files --------
+    close(unit = 30)
+    close(unit = 31)
+    close(unit = 32)
+    close(unit = 33)
+    close(unit = 34)
+    close(unit = 35)
+    return
+  end subroutine close_chaincalcs_files
 
   subroutine write_chaincalcs_headers
     write(40,fmt302) 'l', 'ete', 'etedev', 'rog', 'rogdev', 'maxete', 't'

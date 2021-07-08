@@ -299,4 +299,13 @@ contains
     return
   end subroutine open_chaindyn_files
 
+  subroutine close_chaindyn_files
+    close (unit=90)
+    close (unit=91)
+    close (unit=92)
+    close (unit=93)
+    close (unit=94)
+    return
+  end subroutine close_chaindyn_files
+
 end module chaindyn

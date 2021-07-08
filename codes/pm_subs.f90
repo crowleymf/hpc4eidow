@@ -3,7 +3,7 @@ module pm_subs
   implicit none
 
   ! Save Directory Name
-  character(len=:),allocatable :: dir_name
+  character(len=:), allocatable:: dir_name
 
 contains
   !---------------------------------------
@@ -22,8 +22,7 @@ contains
     endif
 
     call get_command_argument(1, arg)   !first, read in the value
-   
-    dir_name = trim(adjustl(arg))
+    dir_name = trim(arg)
     write (outu,'("PMSUBS> ",3a)') 'saving code to----', dir_name,'----'
     return
   end subroutine get_pm_save_dir
@@ -117,64 +116,11 @@ contains
   end subroutine biasd
 
   subroutine pm_close_all_files
-    use param, only:outu
-
-    write(outu,'(a)')"PM> Closing all files"
+    use chaindyn, only: close_chaindyn_files
+    use chaincalc, only: close_chaincalcs_files
     call close_chaindyn_files
     call close_chaincalcs_files
-    call close_boxcalcs_files
-    call close_autocorr_files
     return
   end subroutine pm_close_all_files
-
-    subroutine close_chaincalcs_files
-    !--- Formatted files --------
-    close(unit = 40)
-    close(unit = 41)
-    close(unit = 42)
-    close(unit = 43)
-    close(unit = 44)
-    close(unit = 45)
-    close(unit = 46)
-    close(unit = 47)
-
-    !--- Unformatted files --------
-    close(unit = 30)
-    close(unit = 31)
-    close(unit = 32)
-    close(unit = 33)
-    close(unit = 34)
-    close(unit = 35)
-    return
-  end subroutine close_chaincalcs_files
-
-subroutine close_boxcalcs_files
-    close(unit=51)
-    close(unit=52)
-    close(unit=53)
-    close(unit=54)
-
-    close(unit=55)
-    close(unit=56)
-    close(unit=57)
-    close(unit=58)
-    return  
-  end subroutine close_boxcalcs_files
-
-  subroutine close_chaindyn_files
-    close (unit=90)
-    close (unit=91)
-    close (unit=92)
-    close (unit=93)
-    close (unit=94)
-    return
-  end subroutine close_chaindyn_files
-
-  subroutine close_autocorr_files
-    close(unit=70)
-    close(unit=71)
-    return
-  end subroutine close_autocorr_files
-
 
 end module pm_subs
