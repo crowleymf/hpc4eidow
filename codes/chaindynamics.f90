@@ -279,10 +279,10 @@ contains
       g3avg=g3sum/dnk
       g4favg=g4fsum/dnk
       g4lavg=g4lsum/dnk
-      g4avg=(g4favg+g4lavg)/2.D0
+      g4avg=(g4favg+g4lavg)/two
       g5favg=g5fsum/dnk
       g5lavg=g5lsum/dnk
-      g5avg=(g5favg+g5lavg)/2.D0
+      g5avg=(g5favg+g5lavg)/two
     end subroutine calc_average_ensemble
 
 

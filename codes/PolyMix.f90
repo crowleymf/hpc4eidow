@@ -648,8 +648,8 @@ program polymix
         !FIX can we delete this?
         !  do x=1,nx
         !   xdiv=real(x,kind=pm_dbl)/real(nx+1,kind=pm_dbl)-half
-        !   ppy(x)=pzero*(1.d0+pnew*xdiv)
-        !   pmy(x)=pzero*(1.d0-pnew*xdiv)
+        !   ppy(x)=pzero*(one+pnew*xdiv)
+        !   pmy(x)=pzero*(one-pnew*xdiv)
         !   pxz(x)=pzero
         !  end do
 
@@ -715,8 +715,8 @@ contains
     !!Assign the initial biasing to generate the bipolar shear flow
     !DO x=1,nx
     ! xdiv=real(x,kind=pm_dbl)/real(nx+1,kind=pm_dbl)-half
-    ! ppy(x)=pzero*(1.D0+pmax*xdiv)
-    ! pmy(x)=pzero*(1.D0-pmax*xdiv)
+    ! ppy(x)=pzero*(one+pmax*xdiv)
+    ! pmy(x)=pzero*(one-pmax*xdiv)
     ! pxz(x)=pzero
     !END DO
     !=========================================================================
