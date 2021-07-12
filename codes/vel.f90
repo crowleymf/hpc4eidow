@@ -38,8 +38,8 @@ contains
 
     dispy = 0
     dispx = 0
-    vy    = 0.D0
-    vx    = 0.D0
+    vy    = zero
+    vx    = zero
     lold=0
   end subroutine initalize
 
@@ -57,8 +57,8 @@ contains
     end do
 
     do x=1,nx
-       sumvy(x)=0.D0
-       avgvy(x)=0.D0
+       sumvy(x)=zero
+       avgvy(x)=zero
        do y=1,ny
           do z=1,nz
              sumvy(x)=sumvy(x)+vy(x,y,z)
@@ -75,8 +75,8 @@ contains
     !The average value for the velocity of a given yz-plane is the total velocity divided by
     !the number of lattice sites in a plane (ny*nz/2).
     do y=1,ny
-       sumvx(y)=0.D0
-       avgvx(y)=0.D0
+       sumvx(y)=zero
+       avgvx(y)=zero
        do x=1,nx
           do z=1,nz
              sumvx(y)=sumvx(y)+vx(x,y,z)

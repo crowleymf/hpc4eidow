@@ -57,7 +57,7 @@ program polymix
      c=0
      k0=0
 
-     !-- Randomly select a point on the lattice. 
+     !-- Randomly select a point on the lattice.
      !-- Keep trying for a point until we get a kink, or chain end.
      l1: do while (c<=3 .or. c==7)
         xn=int(ran2(iseed)*real(nx,pm_dbl))+1
@@ -105,10 +105,10 @@ program polymix
         a(xb,yb,zb)=ba
         b(xa,ya,za)=pp(ba)
 
-        if (ran2(iseed)>0.5d0) then
+        if (ran2(iseed)>half) then
            ket(xa,ya,za)=k
            dcon=da
-        else 
+        else
            ket(xb,yb,zb)=k
            dcon=db
         end if
@@ -144,7 +144,7 @@ program polymix
         d=b(xn,yn,zn)
         x=xnp(d,xn)
         y=ynp(d,yn)
-        z=znp(d,zn) 
+        z=znp(d,zn)
 
         a(x,y,z)=13
         ket(x,y,z)=k
@@ -162,7 +162,7 @@ program polymix
 !FIX if this works delete this line !!! 3    continue
      loop3: do while(1 == 1)
         xnw=xnp(d,xn)
-        do while ((xnw<1).OR.(xnw>nx)) 
+        do while ((xnw<1).OR.(xnw>nx))
            call biasd(xn,d, dir_name)
            xnw=xnp(d,xn)
         end do
@@ -192,7 +192,7 @@ program polymix
            if (ket(xa,ya,za)==nkt+1) then
               a(xb,yb,zb)=pp(db)
               b(xa,ya,za)=pp(da)
-              ket(xa,ya,za)=k0   
+              ket(xa,ya,za)=k0
            else
               a(xb,yb,zb)=pp(db)
               b(xa,ya,za)=pp(da)
@@ -219,33 +219,33 @@ program polymix
         t=tmk
         tcount=tcountmk
         value=valuemk
-        cycle mcloop   
+        cycle mcloop
      end if kwblock
 
      call vel(xn,yn,zn,pp(dcon),dir_name)
 
-     !Recall e is the loop condition 
+     !Recall e is the loop condition
 
      !FIX this is a huge loop. Reorganizing into parts/subroutines would be good
      eloop: do while (e/=1)
         x=xn
         y=yn
         z=zn
-        
+
         !Based on the "old" coordinate and the d-code, obtain the "new"
-        !trial position (xn,yn,zn) for the tv.  
-        
+        !trial position (xn,yn,zn) for the tv.
+
         xn=xnp(d,x)
-        
+
         !If the move is through one of the walls, select a new direction.
         !Repeat until the tv is not moving through the wall.
-        
+
         !This "IF" loop prevents steps outside the periodic
         !boundary and simply makes another biased move.
-        
+
         !Simply put, if the TV tries to step out of the box, try again
         !Since this isn't one of the "Monte Carlo Moves" time is not incremented
-        
+
         xnloop: do while((xn<1).or.(xn>nx))
            call biasd(x,d,dir_name)
            xn=xnp(d,x)
@@ -267,7 +267,7 @@ program polymix
         !Set k equal to the chain number at the new point.
         k=ket(xn,yn,zn)
 
-        !If the move is possible, call the velocity routine. 
+        !If the move is possible, call the velocity routine.
         if (pat/=1) call vel(xn,yn,zn,d,dir_name)
 
         !START OF THE MC MOVES
@@ -301,7 +301,7 @@ program polymix
            !pat=2 represents a move along the chain in a-direction.
            !set the direction of the d code coincident with a.
            !time is not incremented because this is a continuation movement;
-           !it is part of the movement of a movable group.  
+           !it is part of the movement of a movable group.
 
         case(2)
            d=pa
@@ -430,10 +430,10 @@ program polymix
 
            ket(x,y,z)=k
 
-           if (k>nkt) then     
+           if (k>nkt) then
               xd(k0)=xd(k0)+qx(d)
               yd(k0)=yd(k0)+qy(d)
-              zd(k0)=zd(k0)+qz(d) 
+              zd(k0)=zd(k0)+qz(d)
 
               xx(k0)=x
               yy(k0)=y
@@ -506,7 +506,7 @@ program polymix
            t=t+tu
            tcount=tcount+1
 
-           !pat=11 represents entry into a chain at a kink in a-direction 
+           !pat=11 represents entry into a chain at a kink in a-direction
 
         case(11)
            cbn=cn(d,pb)
@@ -627,7 +627,7 @@ program polymix
            call biasd(xn,d,dir_name)
 
            t=t+tu
-           tcount=tcount+1             
+           tcount=tcount+1
         end select patselect
 
         if ((mod(tcount,value)==0).and.(tcount/=0)) then
@@ -647,9 +647,9 @@ program polymix
 
         !FIX can we delete this?
         !  do x=1,nx
-        !   xdiv=real(x,kind=pm_dbl)/real(nx+1,kind=pm_dbl)-0.5d0
-        !   ppy(x)=pzero*(1.d0+pnew*xdiv)
-        !   pmy(x)=pzero*(1.d0-pnew*xdiv)
+        !   xdiv=real(x,kind=pm_dbl)/real(nx+1,kind=pm_dbl)-half
+        !   ppy(x)=pzero*(one+pnew*xdiv)
+        !   pmy(x)=pzero*(one-pnew*xdiv)
         !   pxz(x)=pzero
         !  end do
 
@@ -687,9 +687,9 @@ contains
   subroutine init_vars_1
     value=10
     l=0
-    t=0.D0
+    t=zero
     d=0
-    pzero=1.D0/3.D0
+    pzero=third
     iseed=10
     !st=0
     !w=0
@@ -702,7 +702,7 @@ contains
 
     write(outu,fmta)'data.in,conf.in and model.bin file read in'
     !Define fundamental time step
-    tu=2.D0/(real(nx,kind=pm_dbl)*real(ny,kind=pm_dbl)*real(nz,kind=pm_dbl))
+    tu=two/(real(nx,kind=pm_dbl)*real(ny,kind=pm_dbl)*real(nz,kind=pm_dbl))
 
     allocate (ppy(nx),pmy(nx),pxz(nx))
 
@@ -714,9 +714,9 @@ contains
     !PRINT *, 'Assigning biasing value. pmax=', pmax
     !!Assign the initial biasing to generate the bipolar shear flow
     !DO x=1,nx
-    ! xdiv=real(x,kind=pm_dbl)/real(nx+1,kind=pm_dbl)-0.5D0
-    ! ppy(x)=pzero*(1.D0+pmax*xdiv)
-    ! pmy(x)=pzero*(1.D0-pmax*xdiv)
+    ! xdiv=real(x,kind=pm_dbl)/real(nx+1,kind=pm_dbl)-half
+    ! ppy(x)=pzero*(one+pmax*xdiv)
+    ! pmy(x)=pzero*(one-pmax*xdiv)
     ! pxz(x)=pzero
     !END DO
     !=========================================================================
@@ -758,7 +758,7 @@ contains
   ! read_conf_file
   !==========================================================================
   subroutine read_conf_file
-    !Read FCC lattice configuration data from 'conf.in' 
+    !Read FCC lattice configuration data from 'conf.in'
     open(unit=15,file='conf.in',status='old')
 
     do i=1,13
@@ -770,7 +770,7 @@ contains
     end do
 
     do i=1,12
-       read (15,*) (bn(i,j),j=1,12) 
+       read (15,*) (bn(i,j),j=1,12)
     end do
 
     do i=1,12
@@ -786,7 +786,7 @@ contains
   end subroutine read_conf_file
 
   !==========================================================================
-  ! read_and_allocate_model 
+  ! read_and_allocate_model
   !==========================================================================
   subroutine read_and_allocate_model
     !Input the created model
@@ -902,4 +902,3 @@ contains
   end subroutine write_updated_model
 
 end program polymix
-

@@ -289,27 +289,27 @@ contains
       ENDIF
     end subroutine write_col_header
     subroutine init_setup
-      rdsqrt = sqrt(2.D0)
+      rdsqrt = sqrt(two)
 
       boxcount = 0
 
-      sxytot = 0.D0
-      sxztot = 0.D0
-      syztot = 0.D0
-      sxxtot = 0.D0
-      syytot = 0.D0
-      szztot = 0.D0
+      sxytot = zero
+      sxztot = zero
+      syztot = zero
+      sxxtot = zero
+      syytot = zero
+      szztot = zero
     end subroutine init_setup
 
     subroutine init_nx_loop
       count = 0
 
-      sxybin = 0.D0
-      sxzbin = 0.D0
-      syzbin = 0.D0
-      sxxbin = 0.D0
-      syybin = 0.D0
-      szzbin = 0.D0
+      sxybin = zero
+      sxzbin = zero
+      syzbin = zero
+      sxxbin = zero
+      syybin = zero
+      szzbin = zero
 
       binnw1(x) = 0
       binnw2(x) = 0
@@ -429,7 +429,7 @@ contains
       syytot = syytot + syy(x)
       szztot = szztot + szz(x)
 
-      denom = 0.5D0*real(ny*nz, kind=pm_dbl)
+      denom = half*real(ny*nz, kind=pm_dbl)
     end subroutine normalize
 
     subroutine lattice_density
@@ -459,41 +459,40 @@ contains
     end subroutine segmental_density
 
     subroutine zero_out
-      sxysumtemp = 0.D0
-      sxzsumtemp = 0.D0
-      syzsumtemp = 0.D0
-      sxxsumtemp = 0.D0
-      syysumtemp = 0.D0
-      szzsumtemp = 0.D0
+      sxysumtemp = zero
+      sxzsumtemp = zero
+      syzsumtemp = zero
+      sxxsumtemp = zero
+      syysumtemp = zero
+      szzsumtemp = zero
 
       DO x = 1, nx
-         sxysumbintmp(x) = 0.D0
-         sxzsumbintmp(x) = 0.D0
-         syzsumbintmp(x) = 0.D0
-         sxxsumbintmp(x) = 0.D0
-         syysumbintmp(x) = 0.D0
-         szzsumbintmp(x) = 0.D0
+         sxysumbintmp(x) = zero
+         sxzsumbintmp(x) = zero
+         syzsumbintmp(x) = zero
+         sxxsumbintmp(x) = zero
+         syysumbintmp(x) = zero
+         szzsumbintmp(x) = zero
 
-         density1sum(x) = 0.D0
-         density2sum(x) = 0.D0
-         density3sum(x) = 0.D0
-         density4sum(x) = 0.D0
-         density5sum(x) = 0.D0
-         density6sum(x) = 0.D0
-         density7sum(x) = 0.D0
-         density8sum(x) = 0.D0
+         density1sum(x) = zero
+         density2sum(x) = zero
+         density3sum(x) = zero
+         density4sum(x) = zero
+         density5sum(x) = zero
+         density6sum(x) = zero
+         density7sum(x) = zero
+         density8sum(x) = zero
 
-         segdensity1sum(x) = 0.D0
-         segdensity2sum(x) = 0.D0
-         segdensity3sum(x) = 0.D0
-         segdensity4sum(x) = 0.D0
-         segdensity5sum(x) = 0.D0
-         segdensity6sum(x) = 0.D0
-         segdensity7sum(x) = 0.D0
-         segdensity8sum(x) = 0.D0
+         segdensity1sum(x) = zero
+         segdensity2sum(x) = zero
+         segdensity3sum(x) = zero
+         segdensity4sum(x) = zero
+         segdensity5sum(x) = zero
+         segdensity6sum(x) = zero
+         segdensity7sum(x) = zero
+         segdensity8sum(x) = zero
       ENDDO
     end subroutine zero_out
 
   END SUBROUTINE boxcalcs
 end module box_calcs
-
