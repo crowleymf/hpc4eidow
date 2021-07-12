@@ -142,21 +142,21 @@ contains
 
     !averaging after maxdyn loops
     if (mod(l,maxdyn)==0 .and. l /= 0) then
-       eteboxsum = 0.D0
-       rogboxsum = 0.D0
+       eteboxsum = zero
+       rogboxsum = zero
 
-       eteboxsumdev=0.D0
-       rogboxsumdev=0.D0
+       eteboxsumdev=zero
+       rogboxsumdev=zero
 
        ALLOCATE (etebinsum(nx), rogbinsum(nx))
        ALLOCATE (etebinsumdev(nx), rogbinsumdev(nx))
 
        DO x = 1, nx
-          etebinsum(x) = 0.D0
-          rogbinsum(x) = 0.D0
+          etebinsum(x) = zero
+          rogbinsum(x) = zero
 
-          etebinsumdev(x)=0.D0
-          rogbinsumdev(x)=0.D0
+          etebinsumdev(x)=zero
+          rogbinsumdev(x)=zero
        enddo
 
        rewind (30)
@@ -358,27 +358,27 @@ contains
 
   contains
     subroutine initalize
-      eteboxtot = 0.D0
-      eteparatot = 0.D0
-      eteperptot = 0.D0
+      eteboxtot = zero
+      eteparatot = zero
+      eteperptot = zero
 
-      rogtot = 0.D0
+      rogtot = zero
 
-      thetaxtot = 0.D0
-      thetaytot = 0.D0
-      thetaztot = 0.D0
+      thetaxtot = zero
+      thetaytot = zero
+      thetaztot = zero
 
       DO x  = 1, nx
          chainend(x) = 0
-         etebintot(x) = 0.D0
-         eteparabintot(x) = 0.D0
-         eteperpbintot(x) = 0.D0
+         etebintot(x) = zero
+         eteparabintot(x) = zero
+         eteperpbintot(x) = zero
 
-         rogbintot(x) = 0.D0
+         rogbintot(x) = zero
 
-         thetaxbintot(x) = 0.D0
-         thetaybintot(x) = 0.D0
-         thetazbintot(x) = 0.D0
+         thetaxbintot(x) = zero
+         thetaybintot(x) = zero
+         thetazbintot(x) = zero
 
          bin(x) = 0
          bincount(x) = 0
@@ -395,24 +395,24 @@ contains
     end subroutine initalize
 
     subroutine zero_average_init
-      eteboxsum = 0.D0
-      eteparaboxsum = 0.D0
-      eteperpboxsum = 0.D0
+      eteboxsum = zero
+      eteparaboxsum = zero
+      eteperpboxsum = zero
 
-      eteboxsumdev = 0.D0
-      eteparaboxsumdev = 0.D0
-      eteperpboxsumdev = 0.D0
+      eteboxsumdev = zero
+      eteparaboxsumdev = zero
+      eteperpboxsumdev = zero
 
-      rogboxsum = 0.D0
-      rogboxsumdev = 0.D0
+      rogboxsum = zero
+      rogboxsumdev = zero
 
-      thetaxsum = 0.D0
-      thetaysum = 0.D0
-      thetazsum = 0.D0
+      thetaxsum = zero
+      thetaysum = zero
+      thetazsum = zero
 
-      thetaxsumdev = 0.D0
-      thetaysumdev = 0.D0
-      thetazsumdev = 0.D0
+      thetaxsumdev = zero
+      thetaysumdev = zero
+      thetazsumdev = zero
 
       ALLOCATE (etebinsum(nx), eteparabinsum(nx), eteperpbinsum(nx), rogbinsum(nx), chainsum(nx))
       ALLOCATE (etebinsumdev(nx), eteparabinsumdev(nx), eteperpbinsumdev(nx),rogbinsumdev(nx),chainsumdev(nx))
@@ -421,60 +421,60 @@ contains
       ALLOCATE (thetaxbinsumdev(nx), thetaybinsumdev(nx), thetazbinsumdev(nx))
 
       DO x = 1, nx
-         etebinsum(x) = 0.D0
-         eteparabinsum(x) = 0.D0
-         eteperpbinsum(x) = 0.D0
+         etebinsum(x) = zero
+         eteparabinsum(x) = zero
+         eteperpbinsum(x) = zero
 
-         rogbinsum(x) = 0.D0
+         rogbinsum(x) = zero
 
-         chainsum(x) = 0.D0
+         chainsum(x) = zero
 
-         etebinsumdev(x) = 0.D0
-         eteparabinsumdev(x) = 0.D0
-         eteperpbinsumdev(x) = 0.D0
+         etebinsumdev(x) = zero
+         eteparabinsumdev(x) = zero
+         eteperpbinsumdev(x) = zero
 
-         rogbinsumdev(x) = 0.D0
+         rogbinsumdev(x) = zero
 
-         chainsumdev(x) = 0.D0
+         chainsumdev(x) = zero
 
-         nk1sum(x) = 0.D0
-         nk2sum(x) = 0.D0
-         nk3sum(x) = 0.D0
-         nk4sum(x) = 0.D0
-         nk5sum(x) = 0.D0
-         nk6sum(x) = 0.D0
-         nk7sum(x) = 0.D0
-         nk8sum(x) = 0.D0
+         nk1sum(x) = zero
+         nk2sum(x) = zero
+         nk3sum(x) = zero
+         nk4sum(x) = zero
+         nk5sum(x) = zero
+         nk6sum(x) = zero
+         nk7sum(x) = zero
+         nk8sum(x) = zero
 
-         thetaxbinsum(x) = 0.D0
-         thetaybinsum(x) = 0.D0
-         thetazbinsum(x) = 0.D0
+         thetaxbinsum(x) = zero
+         thetaybinsum(x) = zero
+         thetazbinsum(x) = zero
 
-         thetaxbinsumdev(x) = 0.D0
-         thetaybinsumdev(x) = 0.D0
-         thetazbinsumdev(x) = 0.D0
+         thetaxbinsumdev(x) = zero
+         thetaybinsumdev(x) = zero
+         thetazbinsumdev(x) = zero
       ENDDO
     end subroutine zero_average_init
 
     subroutine zero_bincount_init
-      etebin(x) = 0.D0
-      eteparabin(x) = 0.D0
-      eteperpbin(x) = 0.D0
+      etebin(x) = zero
+      eteparabin(x) = zero
+      eteperpbin(x) = zero
 
-      rogbin(x) = 0.D0
+      rogbin(x) = zero
 
-      thetaxbin(x) = 0.D0
-      thetaybin(x) = 0.D0
-      thetazbin(x) = 0.D0
+      thetaxbin(x) = zero
+      thetaybin(x) = zero
+      thetazbin(x) = zero
 
-      nk1avg(x) =  0.D0
-      nk2avg(x) =  0.D0
-      nk3avg(x) =  0.D0
-      nk4avg(x) =  0.D0
-      nk5avg(x) =  0.D0
-      nk6avg(x) =  0.D0
-      nk7avg(x) =  0.D0
-      nk8avg(x) =  0.D0
+      nk1avg(x) =  zero
+      nk2avg(x) =  zero
+      nk3avg(x) =  zero
+      nk4avg(x) =  zero
+      nk5avg(x) =  zero
+      nk6avg(x) =  zero
+      nk7avg(x) =  zero
+      nk8avg(x) =  zero
     end subroutine zero_bincount_init
 
     subroutine iteration_init
@@ -520,25 +520,25 @@ contains
 
     subroutine zero_bead
       !Single bead considerations
-      dxcom(k) = 0.D0
-      dycom(k) = 0.D0
-      dzcom(k) = 0.D0
+      dxcom(k) = zero
+      dycom(k) = zero
+      dzcom(k) = zero
 
-      ete(k) = 0.D0
-      etepara(k) = 0.D0
-      eteperp(k) = 0.D0
+      ete(k) = zero
+      etepara(k) = zero
+      eteperp(k) = zero
 
-      thetax(k) = 0.D0
-      thetay(k) = 0.D0
-      thetaz(k) = 0.D0
+      thetax(k) = zero
+      thetay(k) = zero
+      thetaz(k) = zero
     end subroutine zero_bead
 
     subroutine box_average
       !The box averages are number averages
       !The totals are divided by nkt at the end
-      thetaxtot = thetaxtot + (3.D0*thetax(k)*thetax(k) - 1.0D0)/two
-      thetaytot = thetaytot + (3.D0*thetay(k)*thetay(k) - 1.0D0)/two
-      thetaztot = thetaztot + (3.D0*thetaz(k)*thetaz(k) - 1.0D0)/two
+      thetaxtot = thetaxtot + (three*thetax(k)*thetax(k) - one)/two
+      thetaytot = thetaytot + (three*thetay(k)*thetay(k) - one)/two
+      thetaztot = thetaztot + (three*thetaz(k)*thetaz(k) - one)/two
 
       eteboxtot = eteboxtot + ete(k)
       eteparatot = eteparatot + etepara(k)
@@ -636,9 +636,9 @@ contains
 
          rogbintot(bin(k)) = rogbintot(bin(k)) + rog(k)
 
-         thetaxbintot(bin(k)) = thetaxbintot(bin(k)) + (3.D0*thetax(k)*thetax(k) - 1.0D0)/two
-         thetaybintot(bin(k)) = thetaybintot(bin(k)) + (3.D0*thetay(k)*thetay(k) - 1.0D0)/two
-         thetazbintot(bin(k)) = thetazbintot(bin(k)) + (3.D0*thetaz(k)*thetaz(k) - 1.0D0)/two
+         thetaxbintot(bin(k)) = thetaxbintot(bin(k)) + (three*thetax(k)*thetax(k) - one)/two
+         thetaybintot(bin(k)) = thetaybintot(bin(k)) + (three*thetay(k)*thetay(k) - one)/two
+         thetazbintot(bin(k)) = thetazbintot(bin(k)) + (three*thetaz(k)*thetaz(k) - one)/two
       ENDIF
     end subroutine calc_single_bead_data
 
