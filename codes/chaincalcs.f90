@@ -183,10 +183,10 @@ contains
           rogboxsumdev = rogboxsumdev + (rogboxtemp-rogboxsum/denom)**2
        end do
        etefinal = eteboxsum/denom
-       etedev = sqrt(eteboxsumdev/(denom-1.d0))
+       etedev = sqrt(eteboxsumdev/(denom-one))
 
        rogfinal = rogboxsum/denom
-       rogdev = sqrt(rogboxsumdev/(denom-1.d0))
+       rogdev = sqrt(rogboxsumdev/(denom-one))
 
        write(40,fmt306) l, etefinal, etedev, rogfinal, rogdev, maxete, t
 
@@ -246,20 +246,20 @@ contains
        eteparafinal = eteparaboxsum/denom
        eteperpfinal = eteperpboxsum/denom
 
-       etedev = sqrt(eteboxsumdev/(denom-1.D0))
-       eteparadev=sqrt(eteparaboxsumdev/(denom-1.D0))
-       eteperpdev=sqrt(eteperpboxsumdev/(denom-1.D0))
+       etedev = sqrt(eteboxsumdev/(denom-one))
+       eteparadev=sqrt(eteparaboxsumdev/(denom-one))
+       eteperpdev=sqrt(eteperpboxsumdev/(denom-one))
 
        rogfinal = rogboxsum/denom
-       rogdev = sqrt(rogboxsumdev/(denom-1.D0))
+       rogdev = sqrt(rogboxsumdev/(denom-one))
 
        thetaxfinal = thetaxsum/denom
        thetayfinal = thetaysum/denom
        thetazfinal = thetazsum/denom
 
-       thetaxdev = sqrt(thetaxsumdev/(denom-1.D0))
-       thetaydev = sqrt(thetaysumdev/(denom-1.D0))
-       thetazdev = sqrt(thetazsumdev/(denom-1.D0))
+       thetaxdev = sqrt(thetaxsumdev/(denom-one))
+       thetaydev = sqrt(thetaysumdev/(denom-one))
+       thetazdev = sqrt(thetazsumdev/(denom-one))
 
        write(41,fmt307) l, etefinal, etedev, eteparafinal, eteparadev, eteperpfinal, eteperpdev, rogfinal, rogdev
 
@@ -298,7 +298,7 @@ contains
 
        DO x = 1, nx
           chainfinal = chainsum(x)/denom
-          chaindev = sqrt(chainsumdev(x)/(denom-1.D0))
+          chaindev = sqrt(chainsumdev(x)/(denom-one))
           WRITE(44,fmt304) x, chainfinal, chaindev
 
           etebinfinal = etebinsum(x)/denom
@@ -306,10 +306,10 @@ contains
           eteparabinfinal = eteparabinsum(x)/denom
           eteperpbinfinal = eteperpbinsum(x)/denom
 
-          etebindev = sqrt(etebinsumdev(x)/(denom-1.D0))
-          eteparabindev = sqrt(eteparabinsumdev(x)/(denom-1.D0))
-          eteperpbindev = sqrt(eteperpbinsumdev(x)/(denom-1.D0))
-          rogbindev = sqrt(rogbinsumdev(x)/(denom-1.D0))
+          etebindev = sqrt(etebinsumdev(x)/(denom-one))
+          eteparabindev = sqrt(eteparabinsumdev(x)/(denom-one))
+          eteperpbindev = sqrt(eteperpbinsumdev(x)/(denom-one))
+          rogbindev = sqrt(rogbinsumdev(x)/(denom-one))
           WRITE(45,fmt307) x, etebinfinal, etebindev, eteparabinfinal, &
                eteparabindev, eteperpbinfinal, eteperpbindev, &
                rogbinfinal, rogbindev
@@ -328,9 +328,9 @@ contains
           thetaybinfinal = thetaybinsum(x)/denom
           thetazbinfinal = thetazbinsum(x)/denom
 
-          thetaxbindev = sqrt(thetaxbinsumdev(x)/(denom-1.D0))
-          thetaybindev = sqrt(thetaybinsumdev(x)/(denom-1.D0))
-          thetazbindev = sqrt(thetazbinsumdev(x)/(denom-1.D0))
+          thetaxbindev = sqrt(thetaxbinsumdev(x)/(denom-one))
+          thetaybindev = sqrt(thetaybinsumdev(x)/(denom-one))
+          thetazbindev = sqrt(thetazbinsumdev(x)/(denom-one))
           WRITE(47,fmt306) x, thetaxbinfinal, thetaxbindev, thetaybinfinal, thetaybindev, thetazbinfinal, thetazbindev
 
        ENDDO
@@ -536,9 +536,9 @@ contains
     subroutine box_average
       !The box averages are number averages
       !The totals are divided by nkt at the end
-      thetaxtot = thetaxtot + (3.D0*thetax(k)*thetax(k) - 1.0D0)/2.D0
-      thetaytot = thetaytot + (3.D0*thetay(k)*thetay(k) - 1.0D0)/2.D0
-      thetaztot = thetaztot + (3.D0*thetaz(k)*thetaz(k) - 1.0D0)/2.D0
+      thetaxtot = thetaxtot + (3.D0*thetax(k)*thetax(k) - 1.0D0)/two
+      thetaytot = thetaytot + (3.D0*thetay(k)*thetay(k) - 1.0D0)/two
+      thetaztot = thetaztot + (3.D0*thetaz(k)*thetaz(k) - 1.0D0)/two
 
       eteboxtot = eteboxtot + ete(k)
       eteparatot = eteparatot + etepara(k)
@@ -636,9 +636,9 @@ contains
 
          rogbintot(bin(k)) = rogbintot(bin(k)) + rog(k)
 
-         thetaxbintot(bin(k)) = thetaxbintot(bin(k)) + (3.D0*thetax(k)*thetax(k) - 1.0D0)/2.D0
-         thetaybintot(bin(k)) = thetaybintot(bin(k)) + (3.D0*thetay(k)*thetay(k) - 1.0D0)/2.D0
-         thetazbintot(bin(k)) = thetazbintot(bin(k)) + (3.D0*thetaz(k)*thetaz(k) - 1.0D0)/2.D0
+         thetaxbintot(bin(k)) = thetaxbintot(bin(k)) + (3.D0*thetax(k)*thetax(k) - 1.0D0)/two
+         thetaybintot(bin(k)) = thetaybintot(bin(k)) + (3.D0*thetay(k)*thetay(k) - 1.0D0)/two
+         thetazbintot(bin(k)) = thetazbintot(bin(k)) + (3.D0*thetaz(k)*thetaz(k) - 1.0D0)/two
       ENDIF
     end subroutine calc_single_bead_data
 
