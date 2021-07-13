@@ -1,6 +1,6 @@
 SUBROUTINE autocorrelate(dir_name)
   use pmtypes
-  USE param
+  use param
 
   implicit none
   integer ::ix, loop
