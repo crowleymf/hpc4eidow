@@ -80,7 +80,6 @@ contains
              ENDDO
           ELSE
              DO z = 2, nz, 2
-
                 k = ket(x,y,z)
                 atemp = a(x,y,z)
                 length = nw(k)
@@ -89,12 +88,15 @@ contains
              ENDDO
           END IF
        END DO
-
        call normalize
-
+       !$OMP parallel sections
+       !$OMP section
        call lattice_density
+       !$OMP section
        call segmental_density
+       !$OMP end parallel sections
        call write_density_data
+
     ENDDO
 
     denom = real(nx, kind=pm_dbl)
@@ -134,7 +136,8 @@ contains
           szzsumtemp = szzsumtemp + szztemp
 
           DO x = 1, nx
-
+             !$OMP parallel sections
+             !$OMP section
              READ(52) point, sxybintmp, sxzbintmp, syzbintmp, sxxbintmp, syybintmp, szzbintmp
              sxysumbintmp(point) = sxysumbintmp(point) + sxybintmp
              sxzsumbintmp(point) = sxzsumbintmp(point) + sxzbintmp
@@ -142,7 +145,7 @@ contains
              sxxsumbintmp(point) = sxxsumbintmp(point) + sxxbintmp
              syysumbintmp(point) = syysumbintmp(point) + syybintmp
              szzsumbintmp(point) = szzsumbintmp(point) + szzbintmp
-
+             !$OMP section
              READ(53) point, density1tmp, density2tmp, density3tmp, density4tmp, density5tmp, density6tmp, density7tmp, density8tmp
              density1sum(point) = density1sum(point) + density1tmp
              density2sum(point) = density2sum(point) + density2tmp
@@ -152,7 +155,7 @@ contains
              density6sum(point) = density6sum(point) + density6tmp
              density7sum(point) = density7sum(point) + density7tmp
              density8sum(point) = density8sum(point) + density8tmp
-
+             !$OMP section
              READ(54) point, segdensity1tmp, segdensity2tmp, segdensity3tmp, segdensity4tmp, &
                   segdensity5tmp, segdensity6tmp, segdensity7tmp, segdensity8tmp
              segdensity1sum(point) = segdensity1sum(point) + segdensity1tmp
@@ -163,6 +166,7 @@ contains
              segdensity6sum(point) = segdensity6sum(point) + segdensity6tmp
              segdensity7sum(point) = segdensity7sum(point) + segdensity7tmp
              segdensity8sum(point) = segdensity8sum(point) + segdensity8tmp
+             !$OMP end parallel sections
           ENDDO
        ENDDO
 
@@ -179,30 +183,32 @@ contains
        REWIND(52)
        REWIND(53)
        REWIND(54)
-
+       !$OMP parallel sections
+       !$OMP section
        OPEN(unit=55, file=dir_name//'stressbox.dat', position='append')
        WRITE(55,402) l, sxyfinal, sxzfinal, syzfinal, sxxfinal, syyfinal, szzfinal
        CLOSE(unit=55)
-
+       !$OMP section
        OPEN(unit=56, file=dir_name//'stressbin.dat', position='append')
        WRITE(56,*) 'l=', l
-
+       !$OMP section
        OPEN(unit=57, file=dir_name//'latticedensity.dat', position='append')
        WRITE(57,*) 'l=', l
-
+       !$OMP section
        OPEN(unit=58, file=dir_name//'segmentdensity.dat', position='append')
        WRITE(58,*) 'l=', l, 't=', t
-
+       !$OMP section
+       !$OMP end parallel sections
        DO x = 1, nx
-
+          !$OMP parallel sections
+          !$OMP section
           sxybinfinal = sxysumbintmp(x)/denom
           sxzbinfinal = sxzsumbintmp(x)/denom
           syzbinfinal = syzsumbintmp(x)/denom
           sxxbinfinal = sxxsumbintmp(x)/denom
           syybinfinal = syysumbintmp(x)/denom
           szzbinfinal = szzsumbintmp(x)/denom
-          WRITE(56,402) x, sxybinfinal, sxzbinfinal, syzbinfinal, sxxbinfinal, syybinfinal, szzbinfinal
-
+          !$OMP section
           density1final = density1sum(x)/denom
           density2final = density2sum(x)/denom
           density3final = density3sum(x)/denom
@@ -211,9 +217,7 @@ contains
           density6final = density6sum(x)/denom
           density7final = density7sum(x)/denom
           density8final = density8sum(x)/denom
-          WRITE(57,403) x, density1final, density2final, density3final, density4final, &
-               density5final, density6final, density7final, density8final
-
+          !$OMP section
           segdensity1final = segdensity1sum(x)/denom
           segdensity2final = segdensity2sum(x)/denom
           segdensity3final = segdensity3sum(x)/denom
@@ -222,21 +226,32 @@ contains
           segdensity6final = segdensity6sum(x)/denom
           segdensity7final = segdensity7sum(x)/denom
           segdensity8final = segdensity8sum(x)/denom
+          !$OMP end parallel sections
+          !$OMP parallel sections
+          !$OMP section
+          WRITE(56,402) x, sxybinfinal, sxzbinfinal, syzbinfinal, sxxbinfinal, syybinfinal, szzbinfinal
+          !$OMP section
+          WRITE(57,403) x, density1final, density2final, density3final, density4final, &
+               density5final, density6final, density7final, density8final
+          !$OMP section
           WRITE(58,403) x, segdensity1final, segdensity2final, segdensity3final, &
                segdensity4final, segdensity5final, segdensity6final, &
                segdensity7final, segdensity8final
+          !$OMP end parallel sections
 
        END DO
-
+       !$OMP parallel sections
+       !$OMP section
        CLOSE(unit = 56)
        CLOSE(unit = 57)
        CLOSE(unit = 58)
-
+       !$OMP section
        DEALLOCATE (sxysumbintmp,sxzsumbintmp,syzsumbintmp)
        DEALLOCATE (sxxsumbintmp,syysumbintmp,szzsumbintmp)
        DEALLOCATE (density1sum,density2sum,density3sum,density4sum,density5sum,density6sum,density7sum,density8sum)
        DEALLOCATE (segdensity1sum,segdensity2sum,segdensity3sum,segdensity4sum, &
             segdensity5sum,segdensity6sum,segdensity7sum,segdensity8sum)
+       !$OMP end parallel sections
 
     END IF
 
@@ -259,33 +274,36 @@ contains
     end subroutine write_density_data
 
     subroutine write_col_header
-400   FORMAT (7(A20,x))
-401   FORMAT (9(A20,x))
-402   FORMAT (I20,x,6(f20.14,x))
-403   FORMAT (I20,x,8(f20.14,x))
+      400   FORMAT (7(A20,x))
+      401   FORMAT (9(A20,x))
+      402   FORMAT (I20,x,6(f20.14,x))
+      403   FORMAT (I20,x,8(f20.14,x))
 
       IF (t==0) THEN
          OPEN(unit=51, file=dir_name//'tmpstressbox.tmp', form='unformatted')
          OPEN(unit=52, file=dir_name//'tmpstressbin.tmp', form='unformatted')
          OPEN(unit=53, file=dir_name//'tmpdensity.tmp', form='unformatted')
          OPEN(unit=54, file=dir_name//'tmpsegdensity.tmp',form='unformatted')
-
+         !$OMP parallel sections
+         !$OMP section
          OPEN(unit=55, file=dir_name//'stressbox.dat', form='formatted')
          WRITE(55,400) 'l', 'sxy', 'sxz', 'syz', 'sxx', 'syy', 'szz'
          CLOSE(unit=55)
-
+         !$OMP section
          OPEN(unit=56, file=dir_name//'stressbin.dat', form='formatted')
          WRITE(56,400) 'x', 'sxy', 'sxz', 'syz', 'sxx', 'syy', 'szz'
          CLOSE(unit=56)
-
+         !$OMP section
          OPEN(unit=57, file=dir_name//'latticedensity.dat', form='formatted')
          WRITE(57,401) 'x', 'density1', 'density2', 'density3', 'density4', 'density5', 'density6', 'density7', 'density8'
          CLOSE(unit=57)
-
+         !$OMP section
          OPEN(unit=58, file=dir_name//'segmentdensity.dat', form='formatted')
          WRITE(58,401) 'x', 'segdensity2', 'segdensity2', 'segdensity3', &
               'segdensity4', 'segdensity5', 'segdensity6', 'segdensity7', 'segdensity8'
          CLOSE(unit=58)
+         !$OMP section
+         !$OMP end parallel sections
       ENDIF
     end subroutine write_col_header
     subroutine init_setup

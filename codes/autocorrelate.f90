@@ -26,19 +26,21 @@ SUBROUTINE autocorrelate(dir_name)
   endif
 
   autoetetot=zero
+  !$OMP parallel sections
+  !$OMP section
   do k=1,nkt
      autoetechain=ete(k)*eteold(k)
      autoetetot=autoetetot+autoetechain
   enddo
   autoete=autoetetot/real(nkt,kind=pm_dbl)
-
+  !$OMP section
   autoveltot = zero
   do ix=1,nx
      autovelbin=avgvy(ix)*vyold(ix)
      autoveltot=autoveltot+autovelbin
   enddo
   autovel=autoveltot/real(nx,kind=pm_dbl)
-
+  !$OMP end parallel sections
   if (l==nequil) then
      open(unit=71, file=dir_name//'autocorrelatebox.dat', position='append')
      write(71,'(i8,3e25.5)') l, t, autoete, autovel
