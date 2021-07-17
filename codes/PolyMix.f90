@@ -731,7 +731,7 @@ contains
        pmy(x)=pzero+pmax*(xdiv-xdiv*xdiv)
        pxz(x)=pzero
     end do
-    !$OMP end do
+    !$OMP end parallel do
 
     write(outu,fmta)'bipolar velocity profile assigned'
 
