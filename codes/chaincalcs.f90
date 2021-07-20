@@ -124,6 +124,7 @@ contains
 
     enddo
     call calc_box_avg
+
     !file unit 30 is the maxdyn loop and 31 is maxsta
     write(30) etebox, rogbox
     write(31) etebox, eteparabox, eteperpbox, rogbox, thetaxbox, thetaybox, thetazbox
@@ -131,13 +132,18 @@ contains
     do x = 1, nx
        denom = real(bincount(x))
        call bin_avg
-
+       !$OMP parallel sections
        !dynamic (calculations made every maxdyn loop) temp file
        write(32) x, etebin(x), rogbin(x)
+       !$OMP section
        !static (calculations made every maxsta loops) temp files
        write(33) x, etebin(x), eteparabin(x), eteperpbin(x), rogbin(x), real(chainend(x),kind=pm_dbl)
+
+       !$OMP section
        write(34) x, nk1avg(x), nk2avg(x), nk3avg(x), nk4avg(x), nk5avg(x), nk6avg(x), nk7avg(x), nk8avg(x)
+       !$OMP section
        write(35) x, thetaxbin(x), thetaybin(x), thetazbin(x)
+       !$OMP end parallel sections
     enddo
 
     !averaging after maxdyn loops
@@ -310,9 +316,7 @@ contains
           eteparabindev = sqrt(eteparabinsumdev(x)/(denom-one))
           eteperpbindev = sqrt(eteperpbinsumdev(x)/(denom-one))
           rogbindev = sqrt(rogbinsumdev(x)/(denom-one))
-          WRITE(45,fmt307) x, etebinfinal, etebindev, eteparabinfinal, &
-               eteparabindev, eteperpbinfinal, eteperpbindev, &
-               rogbinfinal, rogbindev
+
 
           nk1 = nk1sum(x)/denom
           nk2 = nk2sum(x)/denom
@@ -322,7 +326,6 @@ contains
           nk6 = nk6sum(x)/denom
           nk7 = nk7sum(x)/denom
           nk8 = nk8sum(x)/denom
-          WRITE(46,fmt308) x, nk1, nk2, nk3, nk4, nk5, nk6, nk7, nk8
 
           thetaxbinfinal = thetaxbinsum(x)/denom
           thetaybinfinal = thetaybinsum(x)/denom
@@ -331,7 +334,16 @@ contains
           thetaxbindev = sqrt(thetaxbinsumdev(x)/(denom-one))
           thetaybindev = sqrt(thetaybinsumdev(x)/(denom-one))
           thetazbindev = sqrt(thetazbinsumdev(x)/(denom-one))
+          !$OMP parallel sections
+          !$OMP section
+          WRITE(45,fmt307) x, etebinfinal, etebindev, eteparabinfinal, &
+               eteparabindev, eteperpbinfinal, eteperpbindev, &
+               rogbinfinal, rogbindev
+          !$OMP section
+          WRITE(46,fmt308) x, nk1, nk2, nk3, nk4, nk5, nk6, nk7, nk8
+          !$OMP section
           WRITE(47,fmt306) x, thetaxbinfinal, thetaxbindev, thetaybinfinal, thetaybindev, thetazbinfinal, thetazbindev
+          !$OMP end parallel sections
 
        ENDDO
 
@@ -340,17 +352,20 @@ contains
        REWIND(34)
        REWIND(35)
 
+       !$OMP parallel sections
+       !$OMP section
        CLOSE (unit = 44)
        CLOSE (unit = 45)
        CLOSE (unit = 46)
        CLOSE (unit = 47)
 
+       !$OMP section
        DEALLOCATE (etebinsum, eteparabinsum, eteperpbinsum, rogbinsum, chainsum)
        DEALLOCATE (etebinsumdev, eteparabinsumdev, eteperpbinsumdev, rogbinsumdev, chainsumdev)
        DEALLOCATE (nk1sum, nk2sum, nk3sum, nk4sum, nk5sum, nk6sum, nk7sum, nk8sum)
        DEALLOCATE (thetaxbinsum, thetaybinsum, thetazbinsum)
        DEALLOCATE (thetaxbinsumdev, thetaybinsumdev, thetazbinsumdev)
-
+       !$OMP end parallel sections
     ENDIF
 
     call cleanup
@@ -367,7 +382,7 @@ contains
       thetaxtot = zero
       thetaytot = zero
       thetaztot = zero
-
+      !$OMP parallel do
       DO x  = 1, nx
          chainend(x) = 0
          etebintot(x) = zero
@@ -749,75 +764,128 @@ contains
     character(len=*) :: dir_name
 
     dir_name = trim(adjustl(dir_name))
+    !$OMP parallel sections
+    !$OMP section
     !--- Formatted files --------
     open(unit = 40, file=dir_name//'etedynamicbox.dat', form = 'formatted')
+    !$OMP section
     open(unit = 41, file=dir_name//'chainproperties.dat', form = 'formatted')
+    !$OMP section
     open(unit = 42, file=dir_name//'etedynamicbin.dat', form = 'formatted')
+    !$OMP section
     open(unit = 43, file=dir_name//'boxorder.dat', form = 'formatted')
+    !$OMP section
     open(unit = 44, file=dir_name//'chainends.dat', form = 'formatted')
+    !$OMP section
     open(unit = 45, file=dir_name//'binchainproperties.dat', form = 'formatted')
+    !$OMP section
     open(unit = 46, file=dir_name//'nkcom.dat', form = 'formatted')
+    !$OMP section
     open(unit = 47, file=dir_name//'binorder.dat', form = 'formatted')
 
+
     !--- unformatted files --------
+    !$OMP section
     open(unit = 30, file=dir_name//'tmpetedynamicbox.tmp', form = 'unformatted')
+    !$OMP section
     open(unit = 31, file=dir_name//'tmpchainproperties.tmp',form='unformatted')
+    !$OMP section
     open(unit = 32, file=dir_name//'tmpetedynamicbin.tmp', form = 'unformatted')
+    !$OMP section
     open(unit = 33, file=dir_name//'tmpetestaticbox.tmp', form = 'unformatted')
+    !$OMP section
     open(unit = 34, file=dir_name//'tmpnkcombin.tmp', form = 'unformatted')
+    !$OMP section
     open(unit = 35, file=dir_name//'tmporderbin.tmp', form = 'unformatted')
+    !$OMP end parallel sections
     return
   end subroutine open_chaincalcs_files
 
   subroutine close_chaincalcs_files
+    !$OMP parallel sections
     !--- Formatted files --------
+    !$OMP section
     close(unit = 40)
+    !$OMP section
     close(unit = 41)
+    !$OMP section
     close(unit = 42)
+    !$OMP section
     close(unit = 43)
+    !$OMP section
     close(unit = 44)
+    !$OMP section
     close(unit = 45)
+    !$OMP section
     close(unit = 46)
+    !$OMP section
     close(unit = 47)
 
     !--- Unformatted files --------
+    !$OMP section
     close(unit = 30)
+    !$OMP section
     close(unit = 31)
+    !$OMP section
     close(unit = 32)
+    !$OMP section
     close(unit = 33)
+    !$OMP section
     close(unit = 34)
+    !$OMP section
     close(unit = 35)
+    !$OMP end parallel sections
     return
   end subroutine close_chaincalcs_files
 
   subroutine write_chaincalcs_headers
+    !$OMP parallel sections
+    !$OMP section
     write(40,fmt302) 'l', 'ete', 'etedev', 'rog', 'rogdev', 'maxete', 't'
+    !$OMP section
     write(41,fmt303) 'l', 'ete', 'etedev', 'etepara', 'eteparadev', 'eteperp', 'eteperpdev', 'rog', 'rogdev'
+    !$OMP section
     write(42,fmt301) 'x', 'etebin', 'etedev', 'rogbin', 'rogdev'
+    !$OMP section
     write(43,fmt302) 'l', 'thetax', 'thetaxdev', 'thetay', 'thetaydev', 'thetaz', 'thetazdev'
+    !$OMP section
     write(44,fmt300) 'x', 'chainend', 'chainenddev'
+    !$OMP section
     write(45,fmt303) 'x', 'etebin', 'etedbinev', 'eteparabin', 'eteparabindev', 'eteperpbin', 'eteperpbindev', 'rogbin', 'rogbindev'
+    !$OMP section
     write(46,fmt308) 'x', 'nk1', 'nk2', 'nk3', 'nk4', 'nk5', 'nk6', 'nk7', 'nk8'
+    !$OMP section
     write(47,fmt302) 'l', 'thetaxbin', 'thetaxbindev', 'thetaybin', 'thetaybindev', 'thetazbin', 'thetazdevbin'
+    !$OMP end parallel sections
     return
   end subroutine write_chaincalcs_headers
 
   subroutine allocate_chaincalcs_arrays
     use param
+    !$OMP parallel sections
+    !$OMP section
     allocate (dxcom(nkt), dycom(nkt), dzcom(nkt))
+    !$OMP section
     allocate (etepara(nkt), eteperp(nkt))
+    !$OMP section
     allocate (thetax(nkt), thetay(nkt), thetaz(nkt))
+    !$OMP section
     allocate (chainend(nx), rog(nkt))
-
+    !$OMP section
     allocate (bin(nkt), bincount(nx))
+    !$OMP section
     allocate (binnk1(nx), binnk2(nx), binnk3(nx), binnk4(nx), binnk5(nx), binnk6(nx), binnk7(nx), binnk8(nx))
-
+    !$OMP section
     allocate (etebintot(nx), eteparabintot(nx), eteperpbintot(nx))
+    !$OMP section
     allocate (rogbintot(nx), thetaxbintot(nx), thetaybintot(nx), thetazbintot(nx))
-
+    !$OMP section
     allocate (etebin(nx), eteparabin(nx), eteperpbin(nx), rogbin(nx))
+    !$OMP section
     allocate (thetaxbin(nx), thetaybin(nx), thetazbin(nx))
+    !$OMP section
     allocate (nk1avg(nx), nk2avg(nx), nk3avg(nx), nk4avg(nx), nk5avg(nx), nk6avg(nx), nk7avg(nx), nk8avg(nx))
+    !$OMP end parallel sections
     return
   end subroutine allocate_chaincalcs_arrays
 

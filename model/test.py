@@ -62,8 +62,14 @@ class testFiles(unittest.TestCase):
                     second_file_line = lines[0].split()
                     golden_file_line = lines[1].split()
                     for words in zip(second_file_line, golden_file_line):
-                        if words[0][:-2] != words[1][:-2]:
-                            error = error + "\nline num: {:<20} output:{:<20} Expected:{}".format(line_num,words[0][:-2], words[1][:-2])
+                        if words[0][0].isdigit() and words[1][0].isdigit():
+                            number1 = float(words[0])
+                            number2 = float(words[1])
+                            if abs(number1 - number2) > (1/10**8):
+                                error = error + "\nline num: {:<20} output:{:<20} Expected:{}".format(line_num,number1, number2)
+                        else:
+                            if words[0] != words[1]:
+                                    error = error + "\nline num: {:<20} output:{:<20} Expected:{}".format(line_num,words[0][:-2], words[1][:-2])
                     line_num= line_num+1
             if error!="":
                 error = "\n\n"+ comparable_file +"\n" + error

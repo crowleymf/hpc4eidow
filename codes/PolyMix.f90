@@ -724,12 +724,14 @@ contains
 
     write(outu,'("PM> ",a,2x,g15.5)') 'Assigning biasing value. pmax=', pmax
     !Assign the initial biasing to generate the bipolar parabolic flow
+    !$OMP parallel do
     do x=1,nx
        xdiv=real(x-1,kind=pm_dbl)/real(nx-1,kind=pm_dbl)
        ppy(x)=pzero-pmax*(xdiv-xdiv*xdiv)
        pmy(x)=pzero+pmax*(xdiv-xdiv*xdiv)
        pxz(x)=pzero
     end do
+    !$OMP end parallel do
 
     write(outu,fmta)'bipolar velocity profile assigned'
 
